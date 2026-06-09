@@ -1,0 +1,61 @@
+name: Produce & Upload Video
+
+on:
+  workflow_dispatch:
+    inputs:
+      config_file:
+        description: "Config filename in configs/ (e.g. video_03.json)"
+        required: true
+        type: string
+      skip_upload:
+        description: "Skip YouTube upload (produce video only)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore YouTube token
+        run: |
+          echo "${{ secrets.YOUTUBE_TOKEN_B64 }}" | base64 -d > youtube_token.pickle
+
+      - name: Run pipeline
+        env:
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          YOUTUBE_TOKEN_B64: ${{ secrets.YOUTUBE_TOKEN_B64 }}
+        run: |
+          if [ "${{ github.event.inputs.skip_upload }}" = "true" ]; then
+            python pipeline.py --config configs/${{ github.event.inputs.config_file }} --skip-upload
+          else
+            python pipeline.py --config configs/${{ github.event.inputs.config_file }}
+          fi
+
+      - name: Upload final video as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.inputs.config_file }}-output
+          path: output/**/
+          retention-days: 7

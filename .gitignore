@@ -1,0 +1,18 @@
+# Secrets — NEVER commit these
+client_secrets.json
+youtube_token.pickle
+.env
+
+# Pipeline output
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
