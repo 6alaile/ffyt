@@ -83,7 +83,6 @@ jobs:
       - name: Render video with HyperFrames
         run: |
           npx hyperframes render \
-            --input render/index.html \
             --output output_raw.mp4 \
             --headless \
             --fps 30 \
