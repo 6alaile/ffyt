@@ -25,34 +25,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Cache pip dependencies
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # Cache system fonts
-      - name: Cache system fonts
-        uses: actions/cache@v4
-        with:
-          path: /usr/share/fonts/
-          key: ${{ runner.os }}-fonts-dejavu
-          restore-keys: |
-            ${{ runner.os }}-fonts-
-
-      # Cache Pixabay downloads (video clips, audio)
-      - name: Cache media downloads
-        uses: actions/cache@v4
-        with:
-          path: output/
-          key: ${{ runner.os }}-media-${{ hashFiles('configs/**') }}
-          restore-keys: |
-            ${{ runner.os }}-media-
-          
-
       # ── Python ──────────────────────────────────────────────────
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -102,7 +74,35 @@ jobs:
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
             --outdir assets/clips
-            
+
+       # Cache pip dependencies
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Cache system fonts
+      - name: Cache system fonts
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/fonts/
+          key: ${{ runner.os }}-fonts-dejavu
+          restore-keys: |
+            ${{ runner.os }}-fonts-
+
+      # Cache Pixabay downloads (video clips, audio)
+      - name: Cache media downloads
+        uses: actions/cache@v4
+        with:
+          path: output/
+          key: ${{ runner.os }}-media-${{ hashFiles('configs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-media-
+                
+   
       # ── Generate voiceover ───────────────────────────────────────
       - name: Generate voiceover
         run: |
@@ -110,7 +110,7 @@ jobs:
             --config configs/${{ github.event.inputs.config }} \
             --output assets/audio/full_voiceover.mp3
 
-# ── Install Headless Browser System Dependencies ─────────────
+      # ── Install Headless Browser System Dependencies ─────────────--------
       - name: Install Puppeteer System Dependencies
         run: |
           sudo apt-get update
