@@ -158,7 +158,7 @@ def make_fallback_clip(scene: dict, dest: Path, w: int, h: int):
         "-f", "lavfi",
         "-i", f"color=c=0x0a0a0a:s={w}x{h}:d={scene['duration']}",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30",
-        str(dest)
+        str(desc)
     ], None, scene['duration'], w, h, desc=f"fallback {scene['id']}")
 
 
