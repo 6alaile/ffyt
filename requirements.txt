@@ -1,7 +1,6 @@
 edge-tts
 requests
 tqdm
-hyperframes
 google-auth
 google-auth-oauthlib
 google-api-python-client
