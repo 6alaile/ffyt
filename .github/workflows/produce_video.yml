@@ -1,61 +1,107 @@
-name: Produce & Upload Video
+name: Produce Video
 
 on:
   workflow_dispatch:
     inputs:
-      config_file:
-        description: "Config filename in configs/ (e.g. video_03.json)"
+      config:
+        description: 'Config filename (e.g. wc2026_ep01.json) from configs/'
         required: true
-        type: string
-      skip_upload:
-        description: "Skip YouTube upload (produce video only)"
-        required: false
-        default: "false"
+        default: 'wc2026_ep01.json'
+      format:
+        description: 'Output format: landscape (1920x1080) or portrait (1080x1920)'
+        required: true
+        default: 'landscape'
         type: choice
         options:
-          - "false"
-          - "true"
+          - landscape
+          - portrait
 
 jobs:
   produce:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # ── Python ──────────────────────────────────────────────────
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: Install system dependencies
+      # ── Node.js (required by HyperFrames) ───────────────────────
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # ── System deps: FFmpeg + fonts ──────────────────────────────
+      - name: Install FFmpeg and fonts
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation \
+            libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 \
+            libasound2 libxss1 libgtk-3-0
+        # The extra packages are headless Chrome deps needed by HyperFrames
 
+      # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: pip install requests tqdm pillow edge-tts
 
-      - name: Restore YouTube token
+      # ── HyperFrames ─────────────────────────────────────────────
+      - name: Install HyperFrames
+        run: npx --yes @heygen/hyperframes --version
+
+      # ── Generate HTML composition ────────────────────────────────
+      - name: Generate HTML from config
         run: |
-          echo "${{ secrets.YOUTUBE_TOKEN_B64 }}" | base64 -d > youtube_token.pickle
+          python scripts/generate_html.py \
+            --config configs/${{ github.event.inputs.config }} \
+            --format ${{ github.event.inputs.format }} \
+            --output composition.html
 
-      - name: Run pipeline
+      # ── Download clips ───────────────────────────────────────────
+      - name: Download Pixabay clips
         env:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
-          YOUTUBE_TOKEN_B64: ${{ secrets.YOUTUBE_TOKEN_B64 }}
         run: |
-          if [ "${{ github.event.inputs.skip_upload }}" = "true" ]; then
-            python pipeline.py --config configs/${{ github.event.inputs.config_file }} --skip-upload
-          else
-            python pipeline.py --config configs/${{ github.event.inputs.config_file }}
-          fi
+          python scripts/fetch_clips.py \
+            --config configs/${{ github.event.inputs.config }} \
+            --format ${{ github.event.inputs.format }} \
+            --outdir assets/clips
 
-      - name: Upload final video as artifact
+      # ── Generate voiceover ───────────────────────────────────────
+      - name: Generate voiceover
+        run: |
+          python scripts/generate_voiceover.py \
+            --config configs/${{ github.event.inputs.config }} \
+            --output assets/audio/full_voiceover.mp3
+
+      # ── Render via HyperFrames ───────────────────────────────────
+      - name: Render video with HyperFrames
+        run: |
+          npx @heygen/hyperframes render \
+            --input composition.html \
+            --output output_raw.mp4 \
+            --headless
+
+      # ── Upload to YouTube ────────────────────────────────────────
+      - name: Upload to YouTube
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python scripts/upload.py \
+            --video output_raw.mp4 \
+            --config configs/${{ github.event.inputs.config }}
+
+      # ── Save rendered video as artifact ─────────────────────────
+      - name: Upload rendered video as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.config_file }}-output
-          path: output/**/
+          name: rendered-video
+          path: output_raw.mp4
           retention-days: 7

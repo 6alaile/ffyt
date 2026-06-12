@@ -1,0 +1,183 @@
+{
+  "title": "Why the 2026 World Cup Is Different From Every Other One",
+  "channel": "@6allerAlert",
+  "youtube": {
+    "description": "The 2026 FIFA World Cup kicks off June 11 — the biggest, most consequential tournament ever staged. 48 teams, 104 games, three host nations.\n\nMessi and Ronaldo's last dance. Mbappé four goals from the all-time record. The USA hosting on home soil for the first time.\n\nSubscribe — we're covering every subplot, every upset, every controversy through the final on July 19th.",
+    "tags": ["2026 World Cup", "FIFA World Cup 2026", "World Cup preview", "Messi", "Ronaldo", "Mbappe", "USMNT", "football 2026", "soccer analysis"],
+    "category": "Sports",
+    "made_for_kids": false
+  },
+  "scenes": [
+    {
+      "id": "01_hook",
+      "template": "impact_statement",
+      "duration": 8,
+      "clip_query": "soccer stadium crowd cheering",
+      "section_label": "LIVE — FIFA WORLD CUP 2026",
+      "data": {
+        "eyebrow": "// THE RECKONING",
+        "line1": "EVERY WORLD CUP GETS CALLED",
+        "line1_accent": "HISTORIC.",
+        "line2": "THIS ONE",
+        "line2_accent": "ACTUALLY IS.",
+        "subhead": "// 4 MINUTES  //  8 REASONS  //  1 VERDICT",
+        "footer_left": "JUNE 11, 2026 — JULY 19, 2026",
+        "footer_right_pill": "PROOF"
+      }
+    },
+    {
+      "id": "02_scale",
+      "template": "stat_split",
+      "duration": 22,
+      "clip_query": "soccer football world cup stadium",
+      "section_label": "01 — THE SCALE",
+      "data": {
+        "eyebrow": "// THE ANIMAL IS DIFFERENT",
+        "headline": "BIGGER THAN EVERY CUP",
+        "headline_accent": "BEFORE.",
+        "body": "A completely different tournament. The largest single sporting event on Earth.",
+        "stats": [
+          {"value": "48", "label": "NATIONS"},
+          {"value": "104", "label": "MATCHES"},
+          {"value": "16", "label": "HOST CITIES"},
+          {"value": "3", "label": "COUNTRIES"}
+        ],
+        "footer_left": "FIFA WORLD CUP — FORMAT REFORM",
+        "footer_right": "USA · CAN · MEX"
+      }
+    },
+    {
+      "id": "03_last_dance",
+      "template": "title_card",
+      "duration": 32,
+      "clip_query": "soccer football match crowd",
+      "section_label": "02 — THE LAST DANCE",
+      "data": {
+        "eyebrow": "// TWO MEN. ONE ERA. THE FINAL ACT.",
+        "headline": "THE LAST",
+        "headline_accent": "DANCE.",
+        "body": "Messi and Ronaldo defined a generation of football. This is almost certainly the last time they share a World Cup stage.",
+        "names": [
+          {"name": "MESSI", "detail": "AGE 38 · 2022 CHAMPION"},
+          {"name": "RONALDO", "detail": "AGE 41 · 5 GOLDEN BOOTS"}
+        ],
+        "footer_left": "THE TWILIGHT ERA",
+        "footer_right": "2026 — THE FINALE"
+      }
+    },
+    {
+      "id": "04_mbappe",
+      "template": "stat_focus",
+      "duration": 24,
+      "clip_query": "football player dribbling ball",
+      "section_label": "03 — THE RECORD CHASE",
+      "data": {
+        "stat_label": "GOALS FROM THE RECORD",
+        "stat_value": "4",
+        "stat_context": "MIROSLAV KLOSE — 16 GOALS",
+        "tag": "// THE HUNTER",
+        "name": "MBAPPÉ.",
+        "quote": "He is 27 years old. Klose was 36 when he retired. Let that sink in.",
+        "footer_left": "FRANCE · CAPTAIN",
+        "footer_right_pill": "RECORD IN SIGHT"
+      }
+    },
+    {
+      "id": "05_hosts",
+      "template": "three_column",
+      "duration": 35,
+      "clip_query": "sports stadium crowd cheering",
+      "section_label": "04 — THE HOSTS",
+      "data": {
+        "eyebrow": "// THREE NATIONS. ONE PRESSURE.",
+        "headline": "THE HOME FRONT.",
+        "cards": [
+          {
+            "flag": "🇺🇸",
+            "name": "USA",
+            "stats": [
+              {"value": "Pochettino", "label": "Manager"},
+              {"value": "D", "label": "Group · Rd 1 vs PAR"},
+              {"value": "QTR 2002", "label": "Best finish"}
+            ],
+            "quote": "The US can win it."
+          },
+          {
+            "flag": "🇨🇦",
+            "name": "CANADA",
+            "stats": [
+              {"value": "Marsch", "label": "Manager"},
+              {"value": "B", "label": "Group · Rd 1 vs CMR"},
+              {"value": "GROUP 2022", "label": "Best finish"}
+            ],
+            "quote": "First men's WC since 1986."
+          },
+          {
+            "flag": "🇲🇽",
+            "name": "MEXICO",
+            "stats": [
+              {"value": "Aguirre", "label": "Manager"},
+              {"value": "A", "label": "Group · Rd 1 vs SWE"},
+              {"value": "QTR 1970/86", "label": "Best finish"}
+            ],
+            "quote": "El Tri. Home soil."
+          }
+        ],
+        "footer_left": "THREE HOSTS — ONE CONTINENT",
+        "footer_right": "NORTH AMERICA"
+      }
+    },
+    {
+      "id": "06_new_world",
+      "template": "tag_list",
+      "duration": 20,
+      "clip_query": "world map globe football soccer",
+      "section_label": "05 — DEBUTANTS",
+      "data": {
+        "eyebrow": "// FOOTBALL'S EXPANDING UNIVERSE",
+        "headline": "A NEW",
+        "headline_accent": "WORLD.",
+        "body": "First-time nations. Players from islands and steppes the World Cup has never seen.",
+        "tags": [
+          {"prefix": "DEBUT", "name": "CAPE VERDE"},
+          {"prefix": "DEBUT", "name": "CURAÇAO"},
+          {"prefix": "DEBUT", "name": "JORDAN"},
+          {"prefix": "DEBUT", "name": "UZBEKISTAN"}
+        ],
+        "footer_left": "FIRST-TIME NATIONS — 2026",
+        "footer_right": "+ 4 DEBUTANTS"
+      }
+    },
+    {
+      "id": "07_verdict",
+      "template": "title_card",
+      "duration": 15,
+      "clip_query": "soccer trophy championship golden",
+      "section_label": "06 — THE VERDICT",
+      "data": {
+        "eyebrow": "// THE FINAL WHISTLE APPROACHES",
+        "headline": "FOOTBALL",
+        "headline_accent": "HISTORY.",
+        "body": "In real time. Don't sleep on it.",
+        "names": [],
+        "footer_left": "39 DAYS OF FOOTBALL",
+        "footer_right": "JULY 19"
+      }
+    },
+    {
+      "id": "08_cta",
+      "template": "cta",
+      "duration": 13,
+      "clip_query": "soccer football team celebration",
+      "section_label": "07 — STAY WITH US",
+      "data": {
+        "badge": "// THE CHANNEL",
+        "headline": "SUBSCRIBE.",
+        "body": "Every subplot. Every upset. Every controversy until the final whistle — and beyond.",
+        "sub_bottom": "JUNE 11 → JULY 19 → TRANSFER WINDOW",
+        "footer_left": "THE 2026 CHANNEL",
+        "footer_right": "RING THE BELL"
+      }
+    }
+  ]
+}
