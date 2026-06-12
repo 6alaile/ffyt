@@ -139,17 +139,17 @@ def run_ffmpeg(args, desc=""):
         cmd = [
             "ffmpeg", "-y", "-i", str(raw_path),
             "-ss", "0", "-t", str(duration),
-            "-r", "30",
-            "-an",
+            "-r", "30",  # Matches Hyperframes deterministic timeline stepping
+            "-an",  # Strips clip audio so Chrome doesn't clash with full_voiceover.mp3
             "-vf", f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2",
             str(dest)
-        ]
+        ] + args
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if result.returncode != 0:
-        print(f"\n  ❌ FFmpeg error ({desc}):")
-        print(result.stderr.decode()[-1200:])
-        return False
-    return True
+    	if result.returncode != 0:
+        	print(f"\n  ❌ FFmpeg error ({desc}):")
+        	print(result.stderr.decode()[-1200:])
+        	return False
+    	return True
 
 
 def make_fallback_clip(scene: dict, dest: Path, w: int, h: int):
