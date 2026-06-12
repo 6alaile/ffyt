@@ -142,7 +142,7 @@ def run_ffmpeg(args, raw_path, duration, w, h, desc=""):
         "-r", "30",  # Matches Hyperframes deterministic timeline stepping
         "-an",  # Strips clip audio so Chrome doesn't clash with full_voiceover.mp3
         "-vf", f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2",
-        str(dest)
+        str(desc)
     ] + args
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
