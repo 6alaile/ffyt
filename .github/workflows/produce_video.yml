@@ -51,8 +51,10 @@ jobs:
         run: pip install requests tqdm pillow edge-tts
 
       # ── HyperFrames ─────────────────────────────────────────────
-      - name: Install HyperFrames
-        run: npx --yes @heygen/hyperframes --version
+      - name: Initialize HyperFrames project
+        run: |
+          npx --yes hyperframes init render --yes
+          ls render
 
       # ── Generate HTML composition ────────────────────────────────
       - name: Generate HTML from config
@@ -60,7 +62,7 @@ jobs:
           python scripts/generate_html.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --output composition.html
+            --output render/index.html
 
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
@@ -70,22 +72,20 @@ jobs:
           python scripts/fetch_clips.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --outdir assets/clips
+            --outdir render/assets/clips
 
       # ── Generate voiceover ───────────────────────────────────────
       - name: Generate voiceover
         run: |
           python scripts/generate_voiceover.py \
             --config configs/${{ github.event.inputs.config }} \
-            --output assets/audio/full_voiceover.mp3
+            --output render/assets/audio/full_voiceover.mp3
 
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
+        working-directory: render
         run: |
-          npx @heygen/hyperframes render \
-            --input composition.html \
-            --output output_raw.mp4 \
-            --headless
+          npx --yes hyperframes render --output ../output_raw.mp4
 
       # ── Upload to YouTube ────────────────────────────────────────
       - name: Upload to YouTube
