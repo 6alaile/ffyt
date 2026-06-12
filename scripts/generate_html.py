@@ -594,6 +594,7 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <style>
       :root {{
         --bg: #0a0a0a;
@@ -776,7 +777,7 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     </style>
   </head>
   <body>
-    <div id="root"
+    <div id="hyperframes-root"
       data-composition-id="composition"
       data-width="{w}"
       data-height="{h}"
