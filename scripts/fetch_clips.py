@@ -160,8 +160,9 @@ def process_clip(scene: dict, raw_path, dest: Path, w: int, h: int):
 
     duration = scene["duration"]
     return run_ffmpeg([
+        "-stream_loop", "-1",
         "-i", str(raw_path),
-        "-ss", "0", "-t", str(duration),
+        "-t", str(duration),
         "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}",
         "-an",
         "-c:v", "libx264", "-preset", "fast", "-crf", "23",
@@ -206,10 +207,12 @@ def main():
             print(f"  ✓ {sid} already processed, skipping")
             continue
 
-        query = scene.get("clip_query", "football soccer")
+        query = scene.get("clip_query", "football")
+        if "football" not in query.lower():
+            query = f"{query} football"
         print(f"  🔍 {sid}: \"{query}\"")
 
-        url, source = search_clip(query, min_duration=min(scene["duration"], 10))
+        url, source = search_clip(query, min_duration=3)
         raw_path = None
         if url:
             raw_path = raw_dir / f"{sid}_raw.mp4"

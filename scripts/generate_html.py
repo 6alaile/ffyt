@@ -130,7 +130,7 @@ def tpl_impact_statement(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -163,7 +163,7 @@ def tpl_stat_split(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -197,7 +197,7 @@ def tpl_title_card(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -225,7 +225,7 @@ def tpl_stat_focus(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -266,7 +266,7 @@ def tpl_three_column(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -292,7 +292,7 @@ def tpl_tag_list(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -318,7 +318,7 @@ def tpl_cta(scene: dict, idx: int, fs: float) -> str:
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
       <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video"
+        <video id="vid-{sid}" class="scene-video clip"
           src="{clip_src(scene['id'])}" muted playsinline
           data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
         <div class="scene-vignette"></div>
@@ -568,7 +568,7 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     # Voiceover element
     vo_html = f"""
       <!-- ──────────── VOICEOVER ──────────── -->
-      <audio id="vo-track" src="assets/audio/full_voiceover.mp3"
+      <audio id="vo-track" class="clip" src="assets/audio/full_voiceover.mp3"
         data-start="0" data-duration="{total_duration:.2f}"
         data-track-index="2" data-volume="1"></audio>"""
 
