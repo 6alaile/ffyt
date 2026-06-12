@@ -82,10 +82,11 @@ jobs:
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
         run: |
-          npx hyperframes render \
-            --output output_raw.mp4 \
-            --headless \
-            --fps 30 \
+          npx hyperframes render 
+            --input render/index.html 
+            --output output_raw.mp4 
+            --headless 
+            --fps 30 
             --concurrency 4
 
       # ── Upload to YouTube ────────────────────────────────────────
