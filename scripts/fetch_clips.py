@@ -134,7 +134,7 @@ def download_file(url: str, dest: Path) -> bool:
 # ─────────────────────────────────────────────
 # FFMPEG PROCESSING
 # ─────────────────────────────────────────────
-def run_ffmpeg(args, desc=""):
+def run_ffmpeg(args, raw_path, duration, w, h, desc=""):
     # Force Constant Frame Rate (r=30), force resolution, and drop existing audio (-an)
     cmd = [
         "ffmpeg", "-y", "-i", str(raw_path),
@@ -159,7 +159,7 @@ def make_fallback_clip(scene: dict, dest: Path, w: int, h: int):
         "-i", f"color=c=0x0a0a0a:s={w}x{h}:d={scene['duration']}",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30",
         str(dest)
-    ], desc=f"fallback {scene['id']}")
+    ], None, scene['duration'], w, h, desc=f"fallback {scene['id']}")
 
 
 def process_clip(scene: dict, raw_path, dest: Path, w: int, h: int):
@@ -176,7 +176,7 @@ def process_clip(scene: dict, raw_path, dest: Path, w: int, h: int):
         "-c:v", "libx264", "-preset", "fast", "-crf", "23",
         "-r", "30",
         str(dest)
-    ], desc=f"process {scene['id']}")
+    ], raw_path, duration, w, h,  desc=f"process {scene['id']}")
 
 
 # ─────────────────────────────────────────────
