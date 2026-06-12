@@ -60,7 +60,7 @@ jobs:
           python scripts/generate_html.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --output composition.html
+            --output render/index.html
 
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
@@ -70,20 +70,20 @@ jobs:
           python scripts/fetch_clips.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --outdir assets/clips
+            --outdir render/assets/clips
 
       # ── Generate voiceover ───────────────────────────────────────
       - name: Generate voiceover
         run: |
           python scripts/generate_voiceover.py \
             --config configs/${{ github.event.inputs.config }} \
-            --output assets/audio/full_voiceover.mp3
+            --output render/assets/audio/full_voiceover.mp3
 
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
         run: |
           npx hyperframes render \
-            --input composition.html \
+            --input render/index.html \
             --output output_raw.mp4 \
             --headless \
             --fps 30 \
