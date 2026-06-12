@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+            
       # ── Node.js (required by HyperFrames) ───────────────────────
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
@@ -46,9 +46,27 @@ jobs:
             libasound2t64 libxss1 libgtk-3-0
         # The extra packages are headless Chrome deps needed by HyperFrames
 
+      # Cache system fonts
+      - name: Cache fonts
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/fonts/
+          key: ${{ runner.os }}-fonts-dejavu
+          restore-keys: |
+            ${{ runner.os }}-fonts-
+
       # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
         run: pip install requests tqdm pillow edge-tts
+
+      # Cache pip dependencies
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-  
 
       # ── HyperFrames ─────────────────────────────────────────────
       - name: Install HyperFrames
@@ -64,6 +82,7 @@ jobs:
 
       - name: Verify composition file
         run: ls -la composition.html
+        
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
         env:
@@ -74,6 +93,15 @@ jobs:
             --format ${{ github.event.inputs.format }} \
             --outdir assets/clips
 
+      # Cache Pixabay downloads (video clips, audio)
+      - name: Cache media downloads
+        uses: actions/cache@v4
+        with:
+          path: output/
+          key: ${{ runner.os }}-media-${{ hashFiles('configs/**') }}
+          restore-keys: |
+            ${{ runner.os }}-media-
+            
       # ── Generate voiceover ───────────────────────────────────────
       - name: Generate voiceover
         run: |
