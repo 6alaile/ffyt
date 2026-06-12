@@ -43,7 +43,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation \
             libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 \
-            libasound2t64 libxss1 libgtk-3-0
+            libasound2 libxss1 libgtk-3-0
         # The extra packages are headless Chrome deps needed by HyperFrames
 
       # ── Python deps ──────────────────────────────────────────────
@@ -51,10 +51,8 @@ jobs:
         run: pip install requests tqdm pillow edge-tts
 
       # ── HyperFrames ─────────────────────────────────────────────
-      - name: Initialize HyperFrames project
-        run: |
-          npx --yes hyperframes init render --yes
-          ls render
+      - name: Install HyperFrames
+        run: npx --yes @heygen/hyperframes --version
 
       # ── Generate HTML composition ────────────────────────────────
       - name: Generate HTML from config
@@ -62,7 +60,7 @@ jobs:
           python scripts/generate_html.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --output render/index.html
+            --output composition.html
 
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
@@ -72,24 +70,27 @@ jobs:
           python scripts/fetch_clips.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --outdir render/assets/clips
+            --outdir assets/clips
 
       # ── Generate voiceover ───────────────────────────────────────
       - name: Generate voiceover
         run: |
           python scripts/generate_voiceover.py \
             --config configs/${{ github.event.inputs.config }} \
-            --output render/assets/audio/full_voiceover.mp3
+            --output assets/audio/full_voiceover.mp3
 
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
-        working-directory: render
         run: |
-          npx --yes hyperframes render --output ../output_raw.mp4
+          npx @heygen/hyperframes render \
+            --input composition.html \
+            --output output_raw.mp4 \
+            --headless \
+            --fps 30 \
+            --concurrency 4
 
       # ── Upload to YouTube ────────────────────────────────────────
       - name: Upload to YouTube
-        continue-on-error: true
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
@@ -101,7 +102,6 @@ jobs:
 
       # ── Save rendered video as artifact ─────────────────────────
       - name: Upload rendered video as artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: rendered-video

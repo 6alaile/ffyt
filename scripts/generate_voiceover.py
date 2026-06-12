@@ -107,18 +107,50 @@ async def main_async(args):
     for scene in scenes:
         sid = scene["id"]
         text = scene_narration(scene)
+        target = scene["duration"]
+
         if not text:
-            print(f"  ⚠️  {sid}: no narration text found, skipping")
+            print(f"  ⚠️  {sid}: no narration text found, using silence pad")
+            # Generate a silent clip for the full scene duration
+            padded = work_dir / f"{sid}_padded.mp3"
+            run_ffmpeg([
+                "-f", "lavfi", "-i", f"anullsrc=r=24000:cl=mono",
+                "-t", str(target),
+                "-c:a", "libmp3lame", "-q:a", "2",
+                str(padded)
+            ], desc=f"silence {sid}")
+            scene_files.append(padded)
             continue
 
-        dest = work_dir / f"{sid}.mp3"
+        raw = work_dir / f"{sid}_raw.mp3"
+        padded = work_dir / f"{sid}_padded.mp3"
+
         print(f"  🔊 {sid}: \"{text[:60]}{'...' if len(text) > 60 else ''}\"")
-        await synthesize(text, args.voice, dest)
-        dur = get_duration(dest)
-        target = scene["duration"]
-        flag = "⚠️  longer than scene!" if dur > target else ""
-        print(f"     ↳ {dur:.1f}s (scene budget: {target}s) {flag}")
-        scene_files.append(dest)
+        await synthesize(text, args.voice, raw)
+        dur = get_duration(raw)
+
+        if dur > target:
+            print(f"     ↳ {dur:.1f}s — LONGER than scene budget ({target}s), trimming to fit")
+            run_ffmpeg([
+                "-i", str(raw),
+                "-t", str(target),
+                "-c:a", "libmp3lame", "-q:a", "2",
+                str(padded)
+            ], desc=f"trim {sid}")
+        else:
+            # Pad with silence so this clip occupies exactly `target` seconds.
+            # apad fills the remaining time; -t hard-trims to the exact duration.
+            silence_needed = target - dur
+            print(f"     ↳ {dur:.1f}s (scene budget: {target}s) — padding {silence_needed:.1f}s silence")
+            run_ffmpeg([
+                "-i", str(raw),
+                "-af", f"apad=whole_dur={target}",
+                "-t", str(target),
+                "-c:a", "libmp3lame", "-q:a", "2",
+                str(padded)
+            ], desc=f"pad {sid}")
+
+        scene_files.append(padded)
 
     if not scene_files:
         print("\n❌ No narration generated.")

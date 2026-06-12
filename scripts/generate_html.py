@@ -129,10 +129,11 @@ def tpl_impact_statement(scene: dict, idx: int, fs: float) -> str:
     z = "z-index: 1;" if idx == 1 else "z-index: 2; opacity: 0;"
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(d.get('section_label', scene.get('section_label', '')))}
         <div class="scene-content" style="align-items:center;text-align:center;">
@@ -162,10 +163,11 @@ def tpl_stat_split(scene: dict, idx: int, fs: float) -> str:
             </div>"""
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content split-layout">
@@ -196,10 +198,11 @@ def tpl_title_card(scene: dict, idx: int, fs: float) -> str:
         names_html = names_html[:-len('<div class="vs mono">VS</div>')]
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         <div class="scene-glow" id="s{idx}-glow" style="left:-400px;top:-200px;"></div>
         {top_bar(scene.get('section_label', ''))}
@@ -224,10 +227,11 @@ def tpl_stat_focus(scene: dict, idx: int, fs: float) -> str:
     z = "z-index: 1;" if idx == 1 else "z-index: 2; opacity: 0;"
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content split-layout" style="align-items:center;">
@@ -265,10 +269,11 @@ def tpl_three_column(scene: dict, idx: int, fs: float) -> str:
             </div>"""
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content" style="padding:0 120px;align-items:stretch;">
@@ -291,10 +296,11 @@ def tpl_tag_list(scene: dict, idx: int, fs: float) -> str:
     )
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         <div class="scene-glow" id="s{idx}-glow" style="right:-400px;top:-200px;"></div>
         {top_bar(scene.get('section_label', ''))}
@@ -317,10 +323,11 @@ def tpl_cta(scene: dict, idx: int, fs: float) -> str:
     z = "z-index: 1;" if idx == 1 else "z-index: 2; opacity: 0;"
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}">
-        <video id="vid-{sid}" class="scene-video clip"
+      <div id="{sid}" class="scene" style="{z}"
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
+        <video id="vid-{sid}" class="scene-video"
           src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="0"></video>
+          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content" style="align-items:center;text-align:center;">
@@ -568,9 +575,9 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     # Voiceover element
     vo_html = f"""
       <!-- ──────────── VOICEOVER ──────────── -->
-      <audio id="vo-track" class="clip" src="assets/audio/full_voiceover.mp3"
+      <audio id="vo-track" src="assets/audio/full_voiceover.mp3"
         data-start="0" data-duration="{total_duration:.2f}"
-        data-track-index="2" data-volume="1"></audio>"""
+        data-track-index="{len(scenes)}" data-volume="1"></audio>"""
 
     gsap_js = build_gsap(scenes)
 
