@@ -69,6 +69,14 @@ jobs:
             ${{ runner.os }}-pip-  
 
       # ── HyperFrames ─────────────────────────────────────────────
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-hyperframes
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: Install HyperFrames
         run: npx --yes hyperframes --version
 
@@ -83,8 +91,19 @@ jobs:
       - name: Verify composition file
         run: ls -la composition.html
         
+      # Cache Pixabay downloads (video clips, audio)
+      - name: Cache media downloads
+        id: cache-media
+        uses: actions/cache@v4
+        with:
+          path: assets/clips/
+          key: ${{ runner.os }}-media-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}-${{ github.event.inputs.format }}
+          restore-keys: |
+            ${{ runner.os }}-media-
+
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
+        if: steps.cache-media.outputs.cache-hit != 'true'
         env:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: |
@@ -93,17 +112,16 @@ jobs:
             --format ${{ github.event.inputs.format }} \
             --outdir assets/clips
 
-      # Cache Pixabay downloads (video clips, audio)
-      - name: Cache media downloads
+      # ── Generate voiceover ───────────────────────────────────────
+      - name: Cache voiceover
+        id: cache-voiceover
         uses: actions/cache@v4
         with:
-          path: output/
-          key: ${{ runner.os }}-media-${{ hashFiles('configs/**') }}
-          restore-keys: |
-            ${{ runner.os }}-media-
-            
-      # ── Generate voiceover ───────────────────────────────────────
+          path: assets/audio/full_voiceover.mp3
+          key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
+
       - name: Generate voiceover
+        if: steps.cache-voiceover.outputs.cache-hit != 'true'
         run: |
           python scripts/generate_voiceover.py \
             --config configs/${{ github.event.inputs.config }} \
