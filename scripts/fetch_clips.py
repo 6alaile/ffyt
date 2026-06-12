@@ -134,16 +134,16 @@ def download_file(url: str, dest: Path) -> bool:
 # ─────────────────────────────────────────────
 # FFMPEG PROCESSING
 # ─────────────────────────────────────────────
-def run_ffmpeg(args, raw_path, duration, w, h, desc=""):
-    # Force Constant Frame Rate (r=30), force resolution, and drop existing audio (-an)
+def run_ffmpeg(input_file, output_file, args, duration, w, h, desc=""):
+    # Build the base FFmpeg command
     cmd = [
-        "ffmpeg", "-y", "-i", str(raw_path),
+        "ffmpeg", "-y", "-i", str(input_file),
         "-ss", "0", "-t", str(duration),
         "-r", "30",  # Matches Hyperframes deterministic timeline stepping
         "-an",  # Strips clip audio so Chrome doesn't clash with full_voiceover.mp3
         "-vf", f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2",
-        str(desc)
-    ] + args
+    ] + args + [str(output_file)]
+    
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
         print(f"\n  ❌ FFmpeg error ({desc}):")
@@ -154,12 +154,19 @@ def run_ffmpeg(args, raw_path, duration, w, h, desc=""):
 
 def make_fallback_clip(scene: dict, dest: Path, w: int, h: int):
     """Solid dark card if no clip is found — HyperFrames text still renders on top."""
-    return run_ffmpeg([
+    cmd = [
+        "ffmpeg", "-y",
         "-f", "lavfi",
         "-i", f"color=c=0x0a0a0a:s={w}x{h}:d={scene['duration']}",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", "30",
-        str(desc)
-    ], None, scene['duration'], w, h, desc=f"fallback {scene['id']}")
+        str(dest)
+    ]
+    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        print(f"\n  ❌ FFmpeg error (fallback {scene['id']}):")
+        print(result.stderr.decode()[-1200:])
+        return False
+    return True
 
 
 def process_clip(scene: dict, raw_path, dest: Path, w: int, h: int):
@@ -167,16 +174,23 @@ def process_clip(scene: dict, raw_path, dest: Path, w: int, h: int):
         return make_fallback_clip(scene, dest, w, h)
 
     duration = scene["duration"]
-    return run_ffmpeg([
-        "-stream_loop", "-1",
-        "-i", str(raw_path),
-        "-t", str(duration),
-        "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}",
-        "-an",
-        "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-        "-r", "30",
-        str(dest)
-    ], raw_path, duration, w, h,  desc=f"process {scene['id']}")
+    return run_ffmpeg(
+        input_file=raw_path,
+        output_file=dest,
+        args=[
+            "-stream_loop", "-1",
+            "-i", str(raw_path),
+            "-t", str(duration),
+            "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}",
+            "-an",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+            "-r", "30",
+        ],
+        duration=duration,
+        w=w,
+        h=h,
+        desc=f"process {scene['id']}"
+    )
 
 
 # ─────────────────────────────────────────────
