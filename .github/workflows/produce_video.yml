@@ -82,7 +82,7 @@ jobs:
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
         run: |
-          npx @heygen/hyperframes render \
+          npx hyperframes render \
             --input composition.html \
             --output output_raw.mp4 \
             --headless \
