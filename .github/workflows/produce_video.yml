@@ -62,6 +62,8 @@ jobs:
             --format ${{ github.event.inputs.format }} \
             --output composition.html
 
+      - name: Verify composition file
+        run: ls -la composition.html
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
         env:
@@ -100,7 +102,7 @@ jobs:
           
           # Execute the render
           npx hyperframes render \
-            --input composition.html \
+            --input ./composition.html \
             --output output_raw.mp4 \
             --headless \
             --fps 30 \
