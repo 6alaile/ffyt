@@ -43,7 +43,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-liberation \
             libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 \
-            libasound2 libxss1 libgtk-3-0
+            libasound2t64 libxss1 libgtk-3-0
         # The extra packages are headless Chrome deps needed by HyperFrames
 
       # ── Python deps ──────────────────────────────────────────────
