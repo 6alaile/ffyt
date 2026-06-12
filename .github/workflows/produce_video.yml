@@ -79,9 +79,27 @@ jobs:
             --config configs/${{ github.event.inputs.config }} \
             --output assets/audio/full_voiceover.mp3
 
+# ── Install Headless Browser System Dependencies 
+─────────────
+      - name: Install Puppeteer System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgbm1 \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libgtk-3-0 \
+            libasound2 \
+            libxss1 \
+            libxtst6
+
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
         run: |
+          # Force download of the correct headless chrome binary for CI
+          npx puppeteer browsers install chrome
+          
+          # Execute the render
           npx hyperframes render \
             --input composition.html \
             --output output_raw.mp4 \
