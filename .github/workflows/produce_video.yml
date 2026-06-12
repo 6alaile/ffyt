@@ -46,9 +46,27 @@ jobs:
             libasound2t64 libxss1 libgtk-3-0
         # The extra packages are headless Chrome deps needed by HyperFrames
 
+      # Cache system fonts
+      - name: Cache fonts
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/fonts/
+          key: ${{ runner.os }}-fonts-dejavu
+          restore-keys: |
+            ${{ runner.os }}-fonts-
+
       # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
         run: pip install requests tqdm pillow edge-tts
+
+      # Cache pip dependencies
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-  
 
       # ── HyperFrames ─────────────────────────────────────────────
       - name: Install HyperFrames
@@ -75,24 +93,6 @@ jobs:
             --format ${{ github.event.inputs.format }} \
             --outdir assets/clips
 
-       # Cache pip dependencies
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # Cache system fonts
-      - name: Cache system fonts
-        uses: actions/cache@v4
-        with:
-          path: /usr/share/fonts/
-          key: ${{ runner.os }}-fonts-dejavu
-          restore-keys: |
-            ${{ runner.os }}-fonts-
-
       # Cache Pixabay downloads (video clips, audio)
       - name: Cache media downloads
         uses: actions/cache@v4
@@ -101,8 +101,7 @@ jobs:
           key: ${{ runner.os }}-media-${{ hashFiles('configs/**') }}
           restore-keys: |
             ${{ runner.os }}-media-
-                
-   
+            
       # ── Generate voiceover ───────────────────────────────────────
       - name: Generate voiceover
         run: |
@@ -110,7 +109,7 @@ jobs:
             --config configs/${{ github.event.inputs.config }} \
             --output assets/audio/full_voiceover.mp3
 
-      # ── Install Headless Browser System Dependencies ─────────────--------
+# ── Install Headless Browser System Dependencies ─────────────
       - name: Install Puppeteer System Dependencies
         run: |
           sudo apt-get update
@@ -123,6 +122,13 @@ jobs:
             libxss1 \
             libxtst6
 
+      - name: Debug pre-render state
+        run: |
+          echo "PWD: $(pwd)"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          ls -la "$GITHUB_WORKSPACE"
+          test -f "$GITHUB_WORKSPACE/composition.html" && echo "composition.html OK" || echo "composition.html MISSING"
+
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
         run: |
@@ -131,8 +137,8 @@ jobs:
           
           # Execute the render
           npx hyperframes render \
-            --input ./composition.html \
-            --output output_raw.mp4 \
+            --input "$GITHUB_WORKSPACE/composition.html" \
+            --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
             --concurrency 4
@@ -145,7 +151,7 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
           python scripts/upload.py \
-            --video output_raw.mp4 \
+            --video "$GITHUB_WORKSPACE/output_raw.mp4" \
             --config configs/${{ github.event.inputs.config }}
 
       # ── Save rendered video as artifact ─────────────────────────
@@ -153,5 +159,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rendered-video
-          path: output_raw.mp4
+          path: ${{ github.workspace }}/output_raw.mp4
           retention-days: 7
