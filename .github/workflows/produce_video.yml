@@ -79,8 +79,7 @@ jobs:
             --config configs/${{ github.event.inputs.config }} \
             --output assets/audio/full_voiceover.mp3
 
-# ── Install Headless Browser System Dependencies 
-─────────────
+# ── Install Headless Browser System Dependencies ─────────────
       - name: Install Puppeteer System Dependencies
         run: |
           sudo apt-get update
