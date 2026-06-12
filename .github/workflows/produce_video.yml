@@ -52,7 +52,7 @@ jobs:
 
       # ── HyperFrames ─────────────────────────────────────────────
       - name: Install HyperFrames
-        run: npx --yes @heygen/hyperframes --version
+        run: npx --yes hyperframes --version
 
       # ── Generate HTML composition ────────────────────────────────
       - name: Generate HTML from config
