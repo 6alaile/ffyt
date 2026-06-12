@@ -132,8 +132,7 @@ def tpl_impact_statement(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(d.get('section_label', scene.get('section_label', '')))}
         <div class="scene-content" style="align-items:center;text-align:center;">
@@ -166,8 +165,7 @@ def tpl_stat_split(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content split-layout">
@@ -201,8 +199,7 @@ def tpl_title_card(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         <div class="scene-glow" id="s{idx}-glow" style="left:-400px;top:-200px;"></div>
         {top_bar(scene.get('section_label', ''))}
@@ -230,8 +227,7 @@ def tpl_stat_focus(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content split-layout" style="align-items:center;">
@@ -272,8 +268,7 @@ def tpl_three_column(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content" style="padding:0 120px;align-items:stretch;">
@@ -299,8 +294,7 @@ def tpl_tag_list(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         <div class="scene-glow" id="s{idx}-glow" style="right:-400px;top:-200px;"></div>
         {top_bar(scene.get('section_label', ''))}
@@ -326,8 +320,7 @@ def tpl_cta(scene: dict, idx: int, fs: float) -> str:
       <div id="{sid}" class="scene" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
         <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" muted playsinline
-          data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
+          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content" style="align-items:center;text-align:center;">
