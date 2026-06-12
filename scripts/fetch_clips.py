@@ -139,8 +139,8 @@ def run_ffmpeg(args, desc=""):
         cmd = [
             "ffmpeg", "-y", "-i", str(raw_path),
             "-ss", "0", "-t", str(duration),
-            "-r", "30",  # Matches Hyperframes deterministic timeline stepping
-            "-an",  # Strips clip audio so Chrome doesn't clash with full_voiceover.mp3
+            "-r", "30",
+            "-an",
             "-vf", f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2",
             str(dest)
         ]
