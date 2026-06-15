@@ -165,6 +165,7 @@ jobs:
         run: |
           mkdir -p hf_input
           cp composition.html hf_input/index.html
+          cp -r assets hf_input/assets
           npx --yes hyperframes render hf_input --output output_raw.mp4
 
       # ── Upload to YouTube ────────────────────────────────────────
