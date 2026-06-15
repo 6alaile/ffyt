@@ -167,8 +167,7 @@ jobs:
           npx puppeteer browsers install chrome
 
           # Execute the render
-          npx hyperframes render \
-            --input "$GITHUB_WORKSPACE/composition.html" \
+          npx hyperframes render composition.html \
             --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
