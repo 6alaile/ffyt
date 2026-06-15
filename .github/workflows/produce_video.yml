@@ -159,7 +159,7 @@ jobs:
             --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
-            --concurrency 4
+            --workers 4
 
       # ── Upload to YouTube ────────────────────────────────────────
       - name: Upload to YouTube

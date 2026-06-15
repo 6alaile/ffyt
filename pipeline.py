@@ -46,7 +46,7 @@ def run_hyperframes_render(composition_html: str, output_video: str, format_name
         "--output", output_video,
         "--headless",
         "--fps", "30",
-        "--concurrency", "4"
+        "--workers", "4"
     ]
     
     print(f"🎬 Rendering video with HyperFrames → {output_video}...")
