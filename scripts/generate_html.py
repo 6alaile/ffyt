@@ -532,7 +532,7 @@ def build_video_layer(scenes: list) -> str:
         sid = f"scene{idx}"
         parts.append(f"""
       <!-- video for scene {idx} -->
-      <video id="vid-{sid}" class="scene-video"
+      <video id="vid-{sid}" class="scene-video clip"
         src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}"
         muted playsinline
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}"
@@ -592,7 +592,6 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       :root {{
         --bg: #0a0a0a;
@@ -816,6 +815,216 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
 
 
 # ─────────────────────────────────────────────
+# SUB-COMPOSITION BUILDER (one file per scene)
+# ─────────────────────────────────────────────
+
+def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name: str) -> str:
+    """Build a standalone sub-composition HTML for a single scene."""
+    w, h = fmt["width"], fmt["height"]
+    fs = fmt["font_scale"]
+    sid = f"scene{idx}"
+    portrait_css = PORTRAIT_OVERRIDES if fmt_name == "portrait" else ""
+
+    tpl_fn = TEMPLATE_MAP.get(scene.get("template", "impact_statement"), tpl_impact_statement)
+    scene_html = tpl_fn(scene, 1, fs)  # always idx=1 inside sub-comp
+    scene_html = scene_html.replace("{{START_1}}", "0")  # sub-comp starts at 0
+
+    video_html = f"""
+      <video id="vid-scene1" class="scene-video clip"
+        src="../{clip_src(scene['id'])}" data-src="../{clip_src(scene['id'])}"
+        muted playsinline
+        data-start="0" data-duration="{scene['duration']}"
+        data-track-index="0"
+        data-scene="scene1"></video>"""
+
+    return f"""<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Scene {idx}: {scene['id']}</title>
+    <style>
+      :root {{
+        --bg: #0a0a0a; --fg: #f5f5f0; --accent: #ffd700;
+        --accent-dim: #b8980a; --rule: #2a2a2a; --muted: #888;
+      }}
+      html, body {{ margin:0; padding:0; background:var(--bg); color:var(--fg);
+        font-family:"Manrope",system-ui,sans-serif; font-weight:350;
+        font-size:{scale_font(28,fs)}px; line-height:1.35; overflow:hidden;
+        width:{w}px; height:{h}px; }}
+      .display,.display* {{ font-family:"Anton","Arial Narrow",sans-serif;
+        font-weight:400; letter-spacing:-0.005em; line-height:0.92; text-transform:uppercase; }}
+      .mono,.mono* {{ font-family:"JetBrains Mono","Courier New",monospace;
+        font-variant-numeric:tabular-nums; letter-spacing:0; }}
+      #hyperframes-root {{ position:relative; width:{w}px; height:{h}px;
+        background:var(--bg); overflow:hidden; }}
+      .scene {{ position:absolute; inset:0; width:{w}px; height:{h}px;
+        overflow:hidden; background:transparent; }}
+      .scene-video {{ position:absolute; inset:0; width:{w}px; height:{h}px;
+        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7);
+        opacity:0; visibility:hidden; }}
+      .scene-vignette {{ position:absolute; inset:0; z-index:2;
+        background: radial-gradient(ellipse 80% 60% at 50% 50%,rgba(10,10,10,0.35),rgba(10,10,10,0.85) 100%),
+          linear-gradient(180deg,rgba(10,10,10,0.4) 0%,rgba(10,10,10,0.1) 30%,rgba(10,10,10,0.7) 100%);
+        pointer-events:none; }}
+      .scene-glow {{ position:absolute; width:1400px; height:1400px; border-radius:50%;
+        background:radial-gradient(circle,rgba(255,215,0,0.12) 0%,rgba(255,215,0,0) 60%);
+        z-index:2; pointer-events:none; }}
+      .scene-content {{ position:relative; width:100%; height:100%; padding:100px 120px;
+        box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; gap:32px; z-index:3; }}
+      .top-bar {{ position:absolute; top:0; left:0; right:0; height:60px; padding:0 120px;
+        display:flex; justify-content:space-between; align-items:center; z-index:5;
+        font-family:"JetBrains Mono",monospace; font-size:{scale_font(18,fs)}px;
+        color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;
+        border-bottom:1px solid var(--rule); }}
+      .top-bar .mark {{ color:var(--accent); font-weight:700; }}
+      .bottom-bar {{ position:absolute; bottom:0; left:0; right:0; height:80px; padding:0 120px;
+        display:flex; justify-content:space-between; align-items:center; z-index:5;
+        font-family:"JetBrains Mono",monospace; font-size:{scale_font(20,fs)}px;
+        color:var(--muted); letter-spacing:0.06em; text-transform:uppercase;
+        border-top:1px solid var(--rule); }}
+      .bottom-bar .pill {{ color:var(--accent); padding:6px 14px;
+        border:1px solid var(--accent); border-radius:2px; }}
+      .split-layout {{ flex-direction:row !important; align-items:stretch; gap:80px; padding:0 120px; }}
+      .left {{ flex:1; display:flex; flex-direction:column; justify-content:center; gap:40px; }}
+      .right {{ flex:1; display:flex; flex-direction:column; gap:32px; justify-content:center; }}
+      .stats-col {{ flex:0 0 700px; display:flex; flex-direction:column; gap:24px; justify-content:center; }}
+      .eyebrow {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px;
+        color:var(--accent); letter-spacing:0.4em; text-transform:uppercase; }}
+      .headline {{ font-size:{scale_font(150,fs)}px; color:var(--fg); }}
+      .headline .accent {{ color:var(--accent); }}
+      .body-text {{ font-size:{scale_font(34,fs)}px; color:var(--fg); line-height:1.3; max-width:1200px; }}
+      .body-italic {{ font-size:{scale_font(36,fs)}px; color:var(--fg); font-style:italic;
+        font-weight:300; max-width:1100px; margin-top:24px; }}
+      .subhead {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(28,fs)}px;
+        color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-top:32px; }}
+      .stat {{ display:flex; flex-direction:column; gap:8px; padding:24px 32px;
+        border-left:4px solid var(--accent); background:rgba(255,215,0,0.04); }}
+      .stat .num {{ font-size:{scale_font(110,fs)}px; color:var(--accent); line-height:0.9; }}
+      .stat .label {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px;
+        color:var(--fg); letter-spacing:0.1em; text-transform:uppercase; }}
+      .names {{ display:flex; gap:80px; margin-top:40px; align-items:center; justify-content:center; }}
+      .name {{ font-size:{scale_font(80,fs)}px; color:var(--accent); }}
+      .name .year {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(24,fs)}px;
+        color:var(--muted); letter-spacing:0.1em; display:block; margin-top:8px; }}
+      .vs {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(32,fs)}px; color:var(--muted); }}
+      .gold-rule {{ position:absolute; background:var(--accent); z-index:4; }}
+      .counter-wrap {{ flex:0 0 900px; display:flex; flex-direction:column; align-items:center;
+        justify-content:center; padding:60px; border:4px solid var(--accent); background:rgba(255,215,0,0.05); }}
+      .counter-label {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(24,fs)}px;
+        color:var(--accent); letter-spacing:0.3em; text-transform:uppercase; margin-bottom:16px; }}
+      .counter {{ font-size:{scale_font(380,fs)}px; color:var(--accent); line-height:0.85; }}
+      .counter-suffix {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(36,fs)}px;
+        color:var(--fg); letter-spacing:0.1em; text-transform:uppercase; margin-top:16px; }}
+      .age {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(32,fs)}px;
+        color:var(--accent); letter-spacing:0.15em; text-transform:uppercase; }}
+      .quote {{ font-size:{scale_font(36,fs)}px; color:var(--fg); line-height:1.3;
+        border-left:4px solid var(--accent); padding-left:24px; margin-top:24px; }}
+      .host-grid {{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:40px; flex:1; }}
+      .host-card {{ display:flex; flex-direction:column; gap:16px; padding:40px 32px;
+        background:rgba(255,255,255,0.03); border-top:6px solid var(--accent); }}
+      .flag {{ font-size:{scale_font(90,fs)}px; line-height:1; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }}
+      .host-name {{ font-size:{scale_font(64,fs)}px; color:var(--fg); }}
+      .host-stats {{ display:flex; flex-direction:column; gap:4px; margin-top:auto; }}
+      .host-stat {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(20,fs)}px;
+        color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }}
+      .host-stat .v {{ color:var(--fg); }}
+      .host-quote {{ font-size:{scale_font(22,fs)}px; color:var(--accent); font-style:italic; margin-top:12px; }}
+      .nations {{ display:flex; flex-wrap:wrap; gap:24px; justify-content:center; max-width:1600px; }}
+      .nation {{ display:flex; align-items:center; gap:12px; padding:16px 28px;
+        background:rgba(255,215,0,0.08); border:1px solid var(--accent);
+        font-family:"JetBrains Mono",monospace; font-size:{scale_font(32,fs)}px;
+        color:var(--fg); text-transform:uppercase; letter-spacing:0.04em; }}
+      .nation .new {{ color:var(--accent); font-size:{scale_font(18,fs)}px; letter-spacing:0.2em; }}
+      .badge {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px;
+        color:var(--accent); letter-spacing:0.4em; text-transform:uppercase;
+        margin-bottom:24px; padding:12px 32px; border:2px solid var(--accent); }}
+      .subscribe-btn {{ display:inline-flex; align-items:center; gap:16px; margin-top:48px;
+        padding:24px 64px; background:var(--accent); color:var(--bg);
+        font-family:"Anton",sans-serif; font-size:{scale_font(56,fs)}px;
+        text-transform:uppercase; letter-spacing:0.05em; cursor:pointer; }}
+      .sub-bottom {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px;
+        color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; margin-top:24px; }}
+      {portrait_css}
+    </style>
+  </head>
+  <body>
+    <div id="hyperframes-root"
+      data-composition-id="scene_{idx:02d}"
+      data-width="{w}"
+      data-height="{h}"
+      data-start="0"
+      data-duration="{scene['duration']:.1f}"
+    >
+      {video_html}
+      {scene_html}
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {{}};
+      document.addEventListener("DOMContentLoaded", function () {{
+        window.__timelines["scene_{idx:02d}"] = window.gsap
+          ? window.gsap.timeline({{ paused: true }})
+          : {{ paused: true }};
+      }});
+    </script>
+  </body>
+</html>"""
+
+
+def build_parent_html(config: dict, fmt: dict, total_duration: float) -> str:
+    """Build the parent composition that mounts each scene as a sub-composition."""
+    w, h = fmt["width"], fmt["height"]
+    scenes = config["scenes"]
+
+    mounts = []
+    t = 0.0
+    for i, scene in enumerate(scenes):
+        idx = i + 1
+        mounts.append(f"""
+      <div data-composition-src="compositions/scene_{idx:02d}.html"
+           data-start="{t:.1f}"
+           data-duration="{scene['duration']:.1f}"
+           class="clip"></div>""")
+        t += scene["duration"]
+
+    vo_html = f"""
+      <audio id="vo-track" src="assets/audio/full_voiceover.mp3"
+        data-start="0" data-duration="{total_duration:.2f}"
+        data-track-index="{len(scenes)}" data-volume="1" class="clip"></audio>"""
+
+    return f"""<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{config.get('title', 'Video Composition')}</title>
+    <style>
+      html, body {{ margin:0; padding:0; background:#0a0a0a;
+        width:{w}px; height:{h}px; overflow:hidden; }}
+    </style>
+  </head>
+  <body>
+    <div id="hyperframes-root"
+      data-composition-id="composition"
+      data-width="{w}"
+      data-height="{h}"
+      data-start="0"
+      data-duration="{total_duration:.1f}"
+    >
+      {"".join(mounts)}
+      {vo_html}
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {{}};
+      document.addEventListener("DOMContentLoaded", function () {{
+        window.__timelines["composition"] = window.gsap
+          ? window.gsap.timeline({{ paused: true }})
+          : {{ paused: true }};
+      }});
+    </script>
+  </body>
+</html>"""
+
+
+# ─────────────────────────────────────────────
 # ENTRY POINT
 # ─────────────────────────────────────────────
 def main():
@@ -834,18 +1043,38 @@ def main():
         config = json.load(f)
 
     fmt = FORMATS[args.format]
-    html = build_html(config, fmt, args.format)
+    scenes = config["scenes"]
+    total_duration = sum(s["duration"] for s in scenes)
 
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(html)
 
-    total = sum(s["duration"] for s in config["scenes"])
+    # Write sub-composition per scene
+    comps_dir = out_path.parent / "compositions"
+    comps_dir.mkdir(parents=True, exist_ok=True)
+
+    starts = []
+    t = 0.0
+    for s in scenes:
+        starts.append(t)
+        t += s["duration"]
+
+    for i, scene in enumerate(scenes):
+        scene_html = build_scene_html(scene, i + 1, starts[i], fmt, args.format)
+        scene_path = comps_dir / f"scene_{i+1:02d}.html"
+        with open(scene_path, "w", encoding="utf-8") as f:
+            f.write(scene_html)
+        print(f"   ✓ Scene {i+1:02d}: {scene['id']} ({scene['duration']}s) → {scene_path}")
+
+    # Write parent composition
+    parent_html = build_parent_html(config, fmt, total_duration)
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(parent_html)
+
     print(f"✅ Generated {out_path}")
     print(f"   Format:   {args.format} ({fmt['width']}x{fmt['height']})")
-    print(f"   Scenes:   {len(config['scenes'])}")
-    print(f"   Duration: {total:.0f}s ({total/60:.1f} min)")
+    print(f"   Scenes:   {len(scenes)}")
+    print(f"   Duration: {total_duration:.0f}s ({total_duration/60:.1f} min)")
 
 
 if __name__ == "__main__":

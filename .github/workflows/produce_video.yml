@@ -166,8 +166,18 @@ jobs:
           mkdir -p hf_input
           cp composition.html hf_input/index.html
           cp -r assets hf_input/assets
+          cp -r compositions hf_input/compositions
           npx --yes hyperframes render hf_input --output output_raw.mp4
 
+      # ── Save rendered video as artifact ─────────────────────────
+      - name: Upload rendered video as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video
+          path: ${{ github.workspace }}/output_raw.mp4
+          retention-days: 7
+          
       # ── Upload to YouTube ────────────────────────────────────────
       - name: Upload to YouTube
         env:
@@ -178,12 +188,3 @@ jobs:
           python scripts/upload.py \
             --video "$GITHUB_WORKSPACE/output_raw.mp4" \
             --config configs/${{ github.event.inputs.config }}
-
-      # ── Save rendered video as artifact ─────────────────────────
-      - name: Upload rendered video as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rendered-video
-          path: ${{ github.workspace }}/output_raw.mp4
-          retention-days: 7
