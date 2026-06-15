@@ -843,6 +843,7 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
   <head>
     <meta charset="UTF-8" />
     <title>Scene {idx}: {scene['id']}</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       :root {{
         --bg: #0a0a0a; --fg: #f5f5f0; --accent: #ffd700;
@@ -982,6 +983,7 @@ def build_parent_html(config: dict, fmt: dict, total_duration: float) -> str:
         idx = i + 1
         mounts.append(f"""
       <div data-composition-src="compositions/scene_{idx:02d}.html"
+           data-composition-id="scene_{idx:02d}"
            data-start="{t:.1f}"
            data-duration="{scene['duration']:.1f}"
            class="clip"></div>""")
@@ -997,6 +999,7 @@ def build_parent_html(config: dict, fmt: dict, total_duration: float) -> str:
   <head>
     <meta charset="UTF-8" />
     <title>{config.get('title', 'Video Composition')}</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       html, body {{ margin:0; padding:0; background:#0a0a0a;
         width:{w}px; height:{h}px; overflow:hidden; }}

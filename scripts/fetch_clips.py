@@ -156,7 +156,8 @@ def process_clip(scene: dict, raw_path, dest: Path, w: int, h: int):
             "-vf", f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}",
             "-an",
             "-c:v", "libx264", "-preset", "fast", "-crf", "23",
-            "-r", "30",
+            "-r", "30", "-g", "30", "-keyint_min", "30",
+            "-movflags", "+faststart",
             str(dest)
         ]
     
