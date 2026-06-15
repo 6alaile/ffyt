@@ -32,14 +32,17 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      # ── Node.js (required by HyperFrames) ───────────────────────
-      # NOTE: no `cache: 'npm'` because this repo has no package.json —
-      # we only use `npx --yes hyperframes`. setup-node's npm cache
-      # requires a lockfile and will fail without one.
+      # ── Node.js (required by HyperFrames + Puppeteer) ─────────
+      # Puppeteer is the only real npm dep (declared in package.json
+      # so the npm cache in setup-node below has something to cache).
+      # HyperFrames is fetched on demand with `npx --yes` and is
+      # intentionally NOT in package.json (transient tool, no need
+      # to lock its version).
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
       # Cache system fonts (restore only — saved by the post-step at job end)
       - name: Restore fonts cache
@@ -81,14 +84,19 @@ jobs:
   
       # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
-        run: pip install requests tqdm pillow edge-tts
+        run: pip install -r requirements.txt
 
-      # Install Puppeteer
-      - name: Install Puppeteer
-        run: npm i puppeteer
-    
-      # ── HyperFrames ─────────────────────────────────────────────
-      - name: Install HyperFrames
+      # Install Puppeteer (the only real npm dep — declared in
+      # package.json so the npm cache in setup-node above has
+      # something to cache). `npm install` rather than `npm ci` so
+      # a missing or out-of-date lockfile on first run doesn't
+      # fail the job; subsequent runs get the cache hit either way.
+      - name: Install npm dependencies
+        run: npm install --no-audit --no-fund
+
+      # Warm the HyperFrames install path (npx --yes) so the render
+      # step later doesn't pay the download cost.
+      - name: Pre-fetch HyperFrames
         run: npx --yes hyperframes --version
 
       # ── Generate HTML composition ────────────────────────────────

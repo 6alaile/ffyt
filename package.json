@@ -1,0 +1,13 @@
+{
+  "name": "ffyt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Football Channel Pipeline — automated, config-driven sports-video production. Node-side deps are dev-only: puppeteer for any local HTML smoke-testing, and the HyperFrames CLI is fetched on demand via npx.",
+  "scripts": {
+    "render": "npx --yes hyperframes render hf_input --output output_raw.mp4",
+    "hyperframes:version": "npx --yes hyperframes --version"
+  },
+  "devDependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}

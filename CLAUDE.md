@@ -26,6 +26,7 @@ The `config: dict` object is the spine that flows through every stage. `title`, 
 Local (requires `ffmpeg` + `ffprobe` on PATH, `PIXABAY_API_KEY` and/or `PEXELS_API_KEY` env var, Node.js 22 with `npx hyperframes`, and the three YouTube env vars for upload):
 ```bash
 pip install -r requirements.txt
+npm install
 python pipeline.py --config configs/wc2026_ep01.json
 python pipeline.py --config configs/wc2026_ep01.json --skip-upload           # produce only
 python pipeline.py --config configs/wc2026_ep01.json --format portrait        # 1080×1920 Shorts
@@ -64,6 +65,6 @@ Pixabay is queried with `min_duration = 3`, then ffmpeg `-stream_loop -1` re-use
 - **Sub-composition pattern is required by HyperFrames.** Each scene is its own self-contained HTML mounted by the parent via `<div data-composition-src="compositions/scene_NN.html" data-start="..." data-duration="...">`. The parent has no scene content of its own.
 - **Format affects more than dimensions.** `FORMATS` in `generate_html.py:86` sets `width`, `height`, and a `font_scale` (landscape 1.0, portrait 0.65). The `PORTRAIT_OVERRIDES` CSS chunk in the same file is only injected when `format=portrait` — it stacks layouts vertically and tightens paddings.
 - **Voiceover timing is auto-corrected.** If TTS produces more text than the scene budget, it's trimmed; if less, silence is padded with `apad=whole_dur={duration}` to land exactly on the scene boundary. The script warns if the total differs from the config by more than 5s.
-- **No tests, no linter, no `package.json`.** Single-purpose automation script. The CI uses `npx --yes hyperframes` and `npm i puppeteer` inline rather than committing a lockfile.
+- **No tests, no linter.** Single-purpose automation script. CI uses `npx --yes hyperframes` (transient, not locked) and pulls Puppeteer from the `package.json` `devDependencies` so the `actions/setup-node` npm cache engages on re-runs.
 - **Secrets must never be committed:** `client_secrets.json`, `youtube_token.pickle`, `.env` are all in `.gitignore`. The CI passes them as env vars; locally the OAuth flow uses your own `InstalledAppFlow` runtime.
 - **Fonts come from Google Fonts, not the system.** Anton / Manrope / JetBrains Mono are pulled by the HTML composition; the `fonts-dejavu-core` apt package in the workflow is a safety net for headless Chrome, not used by the composition itself.

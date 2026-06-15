@@ -25,7 +25,8 @@ upload.py               (YouTube Data API v3)
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
 cd YOUR_REPO
 pip install -r requirements.txt
-# HyperFrames is fetched on demand — no global install needed locally
+npm install
+# HyperFrames CLI is fetched on demand — no global install needed
 ```
 
 ### 2. Get a stock-footage API key
