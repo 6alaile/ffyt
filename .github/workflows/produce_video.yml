@@ -41,6 +41,15 @@ jobs:
         with:
           node-version: '22'
 
+      # Cache system fonts (restore only — saved by the post-step at job end)
+      - name: Restore fonts cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/fonts/
+          key: ${{ runner.os }}-fonts-dejavu
+          restore-keys: |
+            ${{ runner.os }}-fonts-          
+
       # ── System deps: FFmpeg + fonts ──────────────────────────────
       - name: Install FFmpeg and fonts
         run: |
@@ -50,14 +59,12 @@ jobs:
             libasound2t64 libxss1 libgtk-3-0
         # The extra packages are headless Chrome deps needed by HyperFrames
 
-      # Cache system fonts (restore only — saved by the post-step at job end)
-      - name: Restore fonts cache
-        uses: actions/cache@v4
+      - name: Save fonts cache
+        if: success()
+        uses: actions/cache/save@v4
         with:
           path: /usr/share/fonts/
           key: ${{ runner.os }}-fonts-dejavu
-          restore-keys: |
-            ${{ runner.os }}-fonts-
 
       # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
@@ -100,6 +107,13 @@ jobs:
             --format ${{ github.event.inputs.format }} \
             --outdir assets/clips
 
+      - name: Save media cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: assets/clips/
+          key: ${{ runner.os }}-media-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}-${{ github.event.inputs.format }}
+
       # ── Generate voiceover ───────────────────────────────────────
       - name: Restore voiceover cache
         id: cache-voiceover
@@ -113,6 +127,13 @@ jobs:
           python scripts/generate_voiceover.py \
             --config configs/${{ github.event.inputs.config }} \
             --output assets/audio/full_voiceover.mp3
+
+      - name: Save voiceover cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: assets/audio/full_voiceover.mp3
+          key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
 
 # ── Install Headless Browser System Dependencies ─────────────
       - name: Install Puppeteer System Dependencies
@@ -167,26 +188,3 @@ jobs:
           path: ${{ github.workspace }}/output_raw.mp4
           retention-days: 7
 
-      # ── Post-step: save caches (run only on success) ─────────────
-      # These save the populated paths *after* the work that fills them,
-      # which is the only time the contents actually exist.
-      - name: Save fonts cache
-        if: success()
-        uses: actions/cache/save@v4
-        with:
-          path: /usr/share/fonts/
-          key: ${{ runner.os }}-fonts-dejavu
-
-      - name: Save media cache
-        if: success()
-        uses: actions/cache/save@v4
-        with:
-          path: assets/clips/
-          key: ${{ runner.os }}-media-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}-${{ github.event.inputs.format }}
-
-      - name: Save voiceover cache
-        if: success()
-        uses: actions/cache/save@v4
-        with:
-          path: assets/audio/full_voiceover.mp3
-          key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
