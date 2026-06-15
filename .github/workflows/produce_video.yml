@@ -74,6 +74,9 @@ jobs:
       - name: Install HyperFrames
         run: npx --yes hyperframes --version
 
+      - name: Install HyperFrames Engine
+        run: npm install @hyperframes/engine
+
       # ── Generate HTML composition ────────────────────────────────
       - name: Generate HTML from config
         run: |
@@ -163,7 +166,7 @@ jobs:
 
           # Execute the render
           npx hyperframes render \
-            --input "composition.html" \
+            --input "$GITHUB_WORKSPACE/composition.html" \
             --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
