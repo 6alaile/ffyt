@@ -129,10 +129,8 @@ def tpl_impact_statement(scene: dict, idx: int, fs: float) -> str:
     z = "z-index: 1;" if idx == 1 else "z-index: 2; opacity: 0;"
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(d.get('section_label', scene.get('section_label', '')))}
         <div class="scene-content" style="align-items:center;text-align:center;">
@@ -162,10 +160,8 @@ def tpl_stat_split(scene: dict, idx: int, fs: float) -> str:
             </div>"""
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content split-layout">
@@ -196,10 +192,8 @@ def tpl_title_card(scene: dict, idx: int, fs: float) -> str:
         names_html = names_html[:-len('<div class="vs mono">VS</div>')]
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         <div class="scene-glow" id="s{idx}-glow" style="left:-400px;top:-200px;"></div>
         {top_bar(scene.get('section_label', ''))}
@@ -224,10 +218,8 @@ def tpl_stat_focus(scene: dict, idx: int, fs: float) -> str:
     z = "z-index: 1;" if idx == 1 else "z-index: 2; opacity: 0;"
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content split-layout" style="align-items:center;">
@@ -265,10 +257,8 @@ def tpl_three_column(scene: dict, idx: int, fs: float) -> str:
             </div>"""
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content" style="padding:0 120px;align-items:stretch;">
@@ -291,10 +281,8 @@ def tpl_tag_list(scene: dict, idx: int, fs: float) -> str:
     )
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         <div class="scene-glow" id="s{idx}-glow" style="right:-400px;top:-200px;"></div>
         {top_bar(scene.get('section_label', ''))}
@@ -317,10 +305,8 @@ def tpl_cta(scene: dict, idx: int, fs: float) -> str:
     z = "z-index: 1;" if idx == 1 else "z-index: 2; opacity: 0;"
     return f"""
       <!-- ──────────── SCENE {idx}: {scene['id'].upper()} ──────────── -->
-      <div id="{sid}" class="scene" style="{z}"
+      <div id="{sid}" class="scene clip" style="{z}"
         data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}">
-        <video id="vid-{sid}" class="scene-video"
-          src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}" muted playsinline data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}" data-track-index="{idx-1}"></video>
         <div class="scene-vignette"></div>
         {top_bar(scene.get('section_label', ''))}
         <div class="scene-content" style="align-items:center;text-align:center;">
@@ -513,7 +499,7 @@ def build_gsap(scenes: list) -> str:
 
         js.append("")
 
-    js.append(f'      window.__timelines["{{}}" ] = tl;'.format("composition"))
+    js.append('      window.__timelines["composition"] = tl;')
     return "\n".join(js)
 
 
@@ -538,6 +524,23 @@ PORTRAIT_OVERRIDES = """
 # FULL HTML ASSEMBLY
 # ─────────────────────────────────────────────
 
+def build_video_layer(scenes: list) -> str:
+    """Generate all <video> tags as direct stage children (required by HyperFrames)."""
+    parts = []
+    for i, scene in enumerate(scenes):
+        idx = i + 1
+        sid = f"scene{idx}"
+        parts.append(f"""
+      <!-- video for scene {idx} -->
+      <video id="vid-{sid}" class="scene-video"
+        src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}"
+        muted playsinline
+        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}"
+        data-track-index="{idx-1}"
+        data-scene="{sid}"></video>""")
+    return "\n".join(parts)
+
+
 def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     scenes = config["scenes"]
     w, h = fmt["width"], fmt["height"]
@@ -559,6 +562,9 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
 
     portrait_css = PORTRAIT_OVERRIDES if fmt_name == "portrait" else ""
 
+    # Build video layer (hoisted outside scene divs — required by HyperFrames)
+    videos_html = build_video_layer(scenes)
+
     # Build scene HTML
     scenes_html = ""
     for i, scene in enumerate(scenes):
@@ -572,11 +578,11 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
         data-start="0" data-duration="{total_duration:.2f}"
         data-track-index="{len(scenes)}" data-volume="1"></audio>"""
 
-    gsap_js = build_gsap(scenes)
-
-    # Replace start time placeholders
+    # Replace start time placeholders in both layers
     for i, t_start in enumerate(starts):
-        scenes_html = scenes_html.replace(f"{{{{START_{i+1}}}}}", str(t_start))
+        placeholder = f"{{{{START_{i+1}}}}}"
+        videos_html = videos_html.replace(placeholder, str(t_start))
+        scenes_html = scenes_html.replace(placeholder, str(t_start))
 
     html = f"""<!doctype html>
 <html lang="en">
@@ -586,8 +592,6 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <style>
       :root {{
         --bg: #0a0a0a;
@@ -625,13 +629,21 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
         letter-spacing: 0;
       }}
 
+      #hyperframes-root {{
+        position: relative;
+        width: {w}px;
+        height: {h}px;
+        background: var(--bg);
+        overflow: hidden;
+      }}
+
       .scene {{
         position: absolute;
         inset: 0;
         width: {w}px;
         height: {h}px;
         overflow: hidden;
-        background: var(--bg);
+        background: transparent;
       }}
 
       {scene_vis_css}
@@ -655,8 +667,10 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
         width: {w}px;
         height: {h}px;
         object-fit: cover;
-        z-index: 1;
+        z-index: 0;
         filter: brightness(0.55) saturate(0.7);
+        opacity: 0;
+        visibility: hidden;
       }}
 
       .scene-vignette {{
@@ -777,12 +791,22 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
       data-start="0"
       data-duration="{total_duration:.1f}"
     >
+      {videos_html}
       {scenes_html}
       {vo_html}
     </div>
 
     <script>
-      {gsap_js}
+      /* HyperFrames requires window.__timelines["composition"] to be registered.
+         No gsap.set() calls here — initial visibility is handled via CSS. */
+      window.__timelines = window.__timelines || {{}};
+      document.addEventListener("DOMContentLoaded", function () {{
+        if (window.gsap) {{
+          window.__timelines["composition"] = window.gsap.timeline({{ paused: true }});
+        }} else {{
+          window.__timelines["composition"] = {{ paused: true }};
+        }}
+      }});
     </script>
   </body>
 </html>"""
