@@ -70,7 +70,7 @@ jobs:
       - name: Install Puppeteer System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y puppeteer\
+          sudo apt-get install -y \
             libgbm1 \
             libnss3 \
             libatk-bridge2.0-0 \
@@ -79,12 +79,16 @@ jobs:
             libxss1 \
             libxtst6
 
+      # Install Puppeteer
+      - name: Install Puppeteer
+        run: npm i puppeteer
+      
       # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
         run: pip install requests tqdm pillow edge-tts
 
       # ── HyperFrames ─────────────────────────────────────────────
-      - name: Install hyperframes
+      - name: Install hyperframes puppeteer
         run: npx --yes hyperframes --version
 
       # ── Generate HTML composition ────────────────────────────────
