@@ -668,8 +668,6 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
         object-fit: cover;
         z-index: 0;
         filter: brightness(0.55) saturate(0.7);
-        opacity: 0;
-        visibility: hidden;
       }}
 
       .scene-vignette {{
@@ -861,8 +859,7 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
       .scene {{ position:absolute; inset:0; width:{w}px; height:{h}px;
         overflow:hidden; background:transparent; }}
       .scene-video {{ position:absolute; inset:0; width:{w}px; height:{h}px;
-        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7);
-        opacity:0; visibility:hidden; }}
+        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7); }}
       .scene-vignette {{ position:absolute; inset:0; z-index:2;
         background: radial-gradient(ellipse 80% 60% at 50% 50%,rgba(10,10,10,0.35),rgba(10,10,10,0.85) 100%),
           linear-gradient(180deg,rgba(10,10,10,0.4) 0%,rgba(10,10,10,0.1) 30%,rgba(10,10,10,0.7) 100%);
