@@ -66,6 +66,42 @@ jobs:
           path: /usr/share/fonts/
           key: ${{ runner.os }}-fonts-dejavu
 
+      # ── Install Headless Browser System Dependencies ─────────────
+      - name: Install Puppeteer System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgbm1 \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libgtk-3-0 \
+            libasound2t64 \
+            libxss1 \
+            libxtst6
+  
+      # ── Python deps ──────────────────────────────────────────────
+      - name: Install Python dependencies
+        run: pip install requests tqdm pillow edge-tts
+
+      # Install Puppeteer
+      - name: Install Puppeteer
+        run: npm i puppeteer
+    
+      # ── HyperFrames ─────────────────────────────────────────────
+      - name: Install hyperframes puppeteer
+        run: npx --yes hyperframes --version
+
+      # ── Generate HTML composition ────────────────────────────────
+      - name: Generate HTML from config
+        run: |
+          python scripts/generate_html.py \
+            --config configs/${{ github.event.inputs.config }} \
+            --format ${{ github.event.inputs.format }} \
+            --output "$GITHUB_WORKSPACE/composition.html"
+
+      - name: Verify composition file
+        run: ls -la composition.html
+
       # Cache Pixabay downloads (video clips) — restore only.
       # `cache-hit` is true when a partial match is restored, so we still
       # call the fetch step and let it no-op via its built-in skip logic.
@@ -116,43 +152,6 @@ jobs:
           path: assets/audio/full_voiceover.mp3
           key: ${{ runner.os }}-voiceover-${{ hashFiles(format('configs/{0}', github.event.inputs.config)) }}
 
-
-      # ── Install Headless Browser System Dependencies ─────────────
-      - name: Install Puppeteer System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgbm1 \
-            libnss3 \
-            libatk-bridge2.0-0 \
-            libgtk-3-0 \
-            libasound2t64 \
-            libxss1 \
-            libxtst6
-  
-      # ── Python deps ──────────────────────────────────────────────
-      - name: Install Python dependencies
-        run: pip install requests tqdm pillow edge-tts
-
-      # Install Puppeteer
-      - name: Install Puppeteer
-        run: npm i puppeteer
-    
-      # ── HyperFrames ─────────────────────────────────────────────
-      - name: Install hyperframes puppeteer
-        run: npx --yes hyperframes --version
-
-      # ── Generate HTML composition ────────────────────────────────
-      - name: Generate HTML from config
-        run: |
-          python scripts/generate_html.py \
-            --config configs/${{ github.event.inputs.config }} \
-            --format ${{ github.event.inputs.format }} \
-            --output "$GITHUB_WORKSPACE/composition.html"
-
-      - name: Verify composition file
-        run: ls -la composition.html
-
       # Debug Pre-Render State
       - name: Debug pre-render state
         run: |
@@ -168,8 +167,8 @@ jobs:
           npx puppeteer browsers install chrome
 
           # Execute the render
-          npx hyperframes render \
-            --input "$GITHUB_WORKSPACE/composition.html" \
+          npx hyperframes render composition.html \
+            --input "$GITHUB_WORKSPACE/" \
             --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
