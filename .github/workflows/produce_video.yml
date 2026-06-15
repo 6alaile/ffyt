@@ -163,16 +163,9 @@ jobs:
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
         run: |
-          # Force download of the correct headless chrome binary for CI
-          npx puppeteer browsers install chrome
-
-          # Execute the render
-          npx hyperframes render composition.html \
-            --input "$GITHUB_WORKSPACE/" \
-            --output "$GITHUB_WORKSPACE/output_raw.mp4" \
-            --headless \
-            --fps 30 \
-            --workers 4
+          mkdir -p hf_input
+          cp composition.html hf_input/index.html
+          npx --yes hyperframes render hf_input --output output_raw.mp4
 
       # ── Upload to YouTube ────────────────────────────────────────
       - name: Upload to YouTube
