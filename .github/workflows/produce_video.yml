@@ -131,7 +131,7 @@ jobs:
       - name: Install Puppeteer System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt-get install puppeteer -y \
             libgbm1 \
             libnss3 \
             libatk-bridge2.0-0 \
