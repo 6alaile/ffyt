@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Why the 2026 World Cup Is Different From Every Other One</title>
+    <link rel="stylesheet" href="assets/fonts/fonts.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <style>
+      html, body { margin:0; padding:0; background:#0a0a0a;
+        width:1920px; height:1080px; overflow:hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="hyperframes-root"
+      data-composition-id="composition"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="169.0"
+    >
+      
+      <div data-composition-src="compositions/scene_01.html"
+           data-composition-id="scene_01"
+           data-start="0.0"
+           data-duration="8.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_02.html"
+           data-composition-id="scene_02"
+           data-start="8.0"
+           data-duration="22.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_03.html"
+           data-composition-id="scene_03"
+           data-start="30.0"
+           data-duration="32.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_04.html"
+           data-composition-id="scene_04"
+           data-start="62.0"
+           data-duration="24.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_05.html"
+           data-composition-id="scene_05"
+           data-start="86.0"
+           data-duration="35.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_06.html"
+           data-composition-id="scene_06"
+           data-start="121.0"
+           data-duration="20.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_07.html"
+           data-composition-id="scene_07"
+           data-start="141.0"
+           data-duration="15.0"
+           class="clip"></div>
+      <div data-composition-src="compositions/scene_08.html"
+           data-composition-id="scene_08"
+           data-start="156.0"
+           data-duration="13.0"
+           class="clip"></div>
+      
+      <audio id="vo-track" src="assets/audio/full_voiceover.mp3"
+        data-start="0" data-duration="169.00"
+        data-track-index="8" data-volume="1" class="clip"></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      document.addEventListener("DOMContentLoaded", function () {
+        window.__timelines["composition"] = window.gsap
+          ? window.gsap.timeline({ paused: true })
+          : { paused: true };
+      });
+    </script>
+  </body>
+</html>

@@ -589,9 +589,7 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
   <head>
     <meta charset="UTF-8" />
     <title>{config.get('title', 'Video Composition')}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/fonts/fonts.css" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       :root {{
@@ -843,6 +841,7 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
   <head>
     <meta charset="UTF-8" />
     <title>Scene {idx}: {scene['id']}</title>
+    <link rel="stylesheet" href="../assets/fonts/fonts.css" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       :root {{
@@ -999,6 +998,7 @@ def build_parent_html(config: dict, fmt: dict, total_duration: float) -> str:
   <head>
     <meta charset="UTF-8" />
     <title>{config.get('title', 'Video Composition')}</title>
+    <link rel="stylesheet" href="assets/fonts/fonts.css" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       html, body {{ margin:0; padding:0; background:#0a0a0a;
