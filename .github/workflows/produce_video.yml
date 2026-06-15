@@ -66,13 +66,26 @@ jobs:
           path: /usr/share/fonts/
           key: ${{ runner.os }}-fonts-dejavu
 
+      # ── Install Headless Browser System Dependencies ─────────────
+      - name: Install Puppeteer System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgbm1 \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libgtk-3-0 \
+            libasound2t64 \
+            libxss1 \
+            libxtst6
+
       # ── Python deps ──────────────────────────────────────────────
       - name: Install Python dependencies
         run: pip install requests tqdm pillow edge-tts
 
       # ── HyperFrames ─────────────────────────────────────────────
-      #- name: Install HyperFrames
-      #  run: npx --yes hyperframes --version
+      - name: Install hyperframes puppeteer
+        run: npx --yes hyperframes --version
 
       # ── Generate HTML composition ────────────────────────────────
       - name: Generate HTML from config
@@ -135,19 +148,7 @@ jobs:
           path: assets/audio/full_voiceover.mp3
           key: ${{ runner.os }}-voiceover-${{ hashFiles(format('configs/{0}', github.event.inputs.config)) }}
 
-# ── Install Headless Browser System Dependencies ─────────────
-      - name: Install Puppeteer System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgbm1 \
-            libnss3 \
-            libatk-bridge2.0-0 \
-            libgtk-3-0 \
-            libasound2t64 \
-            libxss1 \
-            libxtst6
-
+      # Debug Pre-Render State
       - name: Debug pre-render state
         run: |
           echo "PWD: $(pwd)"
