@@ -796,6 +796,18 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
       {vo_html}
     </div>
 
+    <script>
+      /* HyperFrames requires window.__timelines["composition"] to be registered.
+         No gsap.set() calls here — initial visibility is handled via CSS. */
+      window.__timelines = window.__timelines || {{}};
+      document.addEventListener("DOMContentLoaded", function () {{
+        if (window.gsap) {{
+          window.__timelines["composition"] = window.gsap.timeline({{ paused: true }});
+        }} else {{
+          window.__timelines["composition"] = {{ paused: true }};
+        }}
+      }});
+    </script>
   </body>
 </html>"""
 
