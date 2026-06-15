@@ -80,7 +80,7 @@ jobs:
           python scripts/generate_html.py \
             --config configs/${{ github.event.inputs.config }} \
             --format ${{ github.event.inputs.format }} \
-            --output composition.html
+            --output "$GITHUB_WORKSPACE/composition.html"
 
       - name: Verify composition file
         run: ls -la composition.html
@@ -120,7 +120,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: assets/audio/full_voiceover.mp3
-          key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
+          key: ${{ runner.os }}-voiceover-${{ hashFiles(format('configs/{0}', github.event.inputs.config)) }}
 
       - name: Generate voiceover
         run: |
@@ -133,7 +133,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: assets/audio/full_voiceover.mp3
-          key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
+          key: ${{ runner.os }}-voiceover-${{ hashFiles(format('configs/{0}', github.event.inputs.config)) }}
 
 # ── Install Headless Browser System Dependencies ─────────────
       - name: Install Puppeteer System Dependencies
@@ -187,4 +187,3 @@ jobs:
           name: rendered-video
           path: ${{ github.workspace }}/output_raw.mp4
           retention-days: 7
-
