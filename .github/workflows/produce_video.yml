@@ -33,11 +33,13 @@ jobs:
           cache: 'pip'
 
       # ── Node.js (required by HyperFrames) ───────────────────────
+      # NOTE: no `cache: 'npm'` because this repo has no package.json —
+      # we only use `npx --yes hyperframes`. setup-node's npm cache
+      # requires a lockfile and will fail without one.
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       # ── System deps: FFmpeg + fonts ──────────────────────────────
       - name: Install FFmpeg and fonts
