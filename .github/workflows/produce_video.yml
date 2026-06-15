@@ -88,7 +88,7 @@ jobs:
         run: npm i puppeteer
     
       # ── HyperFrames ─────────────────────────────────────────────
-      - name: Install hyperframes puppeteer
+      - name: Install HyperFrames
         run: npx --yes hyperframes --version
 
       # ── Generate HTML composition ────────────────────────────────
