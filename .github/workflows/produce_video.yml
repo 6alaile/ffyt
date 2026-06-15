@@ -30,12 +30,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-            
+          cache: 'pip'
+
       # ── Node.js (required by HyperFrames) ───────────────────────
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
       # ── System deps: FFmpeg + fonts ──────────────────────────────
       - name: Install FFmpeg and fonts
@@ -46,8 +48,8 @@ jobs:
             libasound2t64 libxss1 libgtk-3-0
         # The extra packages are headless Chrome deps needed by HyperFrames
 
-      # Cache system fonts
-      - name: Cache fonts
+      # Cache system fonts (restore only — saved by the post-step at job end)
+      - name: Restore fonts cache
         uses: actions/cache@v4
         with:
           path: /usr/share/fonts/
@@ -59,24 +61,7 @@ jobs:
       - name: Install Python dependencies
         run: pip install requests tqdm pillow edge-tts
 
-      # Cache pip dependencies
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-  
-
       # ── HyperFrames ─────────────────────────────────────────────
-      - name: Cache npm packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-hyperframes
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
       - name: Install HyperFrames
         run: npx --yes hyperframes --version
 
@@ -90,9 +75,11 @@ jobs:
 
       - name: Verify composition file
         run: ls -la composition.html
-        
-      # Cache Pixabay downloads (video clips, audio)
-      - name: Cache media downloads
+
+      # Cache Pixabay downloads (video clips) — restore only.
+      # `cache-hit` is true when a partial match is restored, so we still
+      # call the fetch step and let it no-op via its built-in skip logic.
+      - name: Restore media cache
         id: cache-media
         uses: actions/cache@v4
         with:
@@ -103,7 +90,6 @@ jobs:
 
       # ── Download clips ───────────────────────────────────────────
       - name: Download Pixabay clips
-        if: steps.cache-media.outputs.cache-hit != 'true'
         env:
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
         run: |
@@ -113,7 +99,7 @@ jobs:
             --outdir assets/clips
 
       # ── Generate voiceover ───────────────────────────────────────
-      - name: Cache voiceover
+      - name: Restore voiceover cache
         id: cache-voiceover
         uses: actions/cache@v4
         with:
@@ -121,7 +107,6 @@ jobs:
           key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
 
       - name: Generate voiceover
-        if: steps.cache-voiceover.outputs.cache-hit != 'true'
         run: |
           python scripts/generate_voiceover.py \
             --config configs/${{ github.event.inputs.config }} \
@@ -152,10 +137,10 @@ jobs:
         run: |
           # Force download of the correct headless chrome binary for CI
           npx puppeteer browsers install chrome
-          
+
           # Execute the render
           npx hyperframes render \
-            --input "composition.html" \
+            --input "$GITHUB_WORKSPACE/composition.html" \
             --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
@@ -179,3 +164,27 @@ jobs:
           name: rendered-video
           path: ${{ github.workspace }}/output_raw.mp4
           retention-days: 7
+
+      # ── Post-step: save caches (run only on success) ─────────────
+      # These save the populated paths *after* the work that fills them,
+      # which is the only time the contents actually exist.
+      - name: Save fonts cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: /usr/share/fonts/
+          key: ${{ runner.os }}-fonts-dejavu
+
+      - name: Save media cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: assets/clips/
+          key: ${{ runner.os }}-media-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}-${{ github.event.inputs.format }}
+
+      - name: Save voiceover cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: assets/audio/full_voiceover.mp3
+          key: ${{ runner.os }}-voiceover-${{ hashFiles('configs/${{ github.event.inputs.config }}') }}
