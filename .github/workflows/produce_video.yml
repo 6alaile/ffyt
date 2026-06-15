@@ -155,7 +155,7 @@ jobs:
           
           # Execute the render
           npx hyperframes render \
-            --input "$GITHUB_WORKSPACE/composition.html" \
+            --input "composition.html" \
             --output "$GITHUB_WORKSPACE/output_raw.mp4" \
             --headless \
             --fps 30 \
