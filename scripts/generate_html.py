@@ -503,6 +503,140 @@ def build_gsap(scenes: list) -> str:
     return "\n".join(js)
 
 
+def build_scene_gsap(scene: dict, scene_idx: int, duration: float) -> str:
+    """Generate GSAP timeline for a single sub-composition scene.
+    All timestamps are rebased to 0 (sub-comp local time).
+    scene_idx is the 1-based scene number used for the compositionId key.
+    Returns a JS string to embed inline in the sub-comp <template>.
+    """
+    js = []
+    tpl = scene.get("template", "impact_statement")
+    # In sub-comp, the scene div is always #scene1 / sid = "scene1"
+    sid = "scene1"
+    idx = 1
+    t_start = 0.0
+    t_end = duration
+
+    js.append("      window.__timelines = window.__timelines || {};")
+    js.append("      var tl = gsap.timeline({ paused: true });")
+    js.append("")
+
+    # Initial state setups + entry animations — mirrors build_gsap() per-template blocks
+    if tpl == "impact_statement":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-eyebrow", {{ y: -30, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-headline", {{ y: 80, opacity: 0, scale: 0.9 }});')
+        js.append(f'      gsap.set("#s{idx}-rule", {{ width: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-subhead", {{ y: 20, opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.4, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-eyebrow", {{ y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }}, {t_start+0.3:.1f});')
+        js.append(f'      tl.to("#s{idx}-headline", {{ y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "expo.out" }}, {t_start+0.7:.1f});')
+        js.append(f'      tl.to("#s{idx}-rule", {{ width: 240, duration: 0.4, ease: "power3.inOut" }}, {t_start+2.0:.1f});')
+        js.append(f'      tl.to("#s{idx}-subhead", {{ y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }}, {t_start+3.0:.1f});')
+
+    elif tpl == "stat_split":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-eyebrow", {{ x: -40, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-headline", {{ y: 60, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-sub", {{ y: 30, opacity: 0 }});')
+        n_stats = len(scene["data"].get("stats", []))
+        for k in range(n_stats):
+            js.append(f'      gsap.set("#s{idx}-stat{k+1}", {{ x: 60, opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.3, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-eyebrow", {{ x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }}, {t_start+0.4:.1f});')
+        js.append(f'      tl.to("#s{idx}-headline", {{ y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }}, {t_start+0.7:.1f});')
+        js.append(f'      tl.to("#s{idx}-sub", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+1.4:.1f});')
+        for k in range(n_stats):
+            js.append(f'      tl.to("#s{idx}-stat{k+1}", {{ x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }}, {t_start+2.0+k*0.4:.1f});')
+
+    elif tpl == "title_card":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-glow", {{ scale: 0, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-eyebrow", {{ letterSpacing: "0.8em", opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-headline", {{ y: 100, opacity: 0, scale: 0.85 }});')
+        js.append(f'      gsap.set("#s{idx}-rule", {{ width: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-sub", {{ y: 20, opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.4, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-glow", {{ scale: 1, opacity: 1, duration: 1.5, ease: "power2.out" }}, {t_start+0.2:.1f});')
+        js.append(f'      tl.to("#s{idx}-eyebrow", {{ letterSpacing: "0.4em", opacity: 1, duration: 1.0, ease: "power2.out" }}, {t_start+0.5:.1f});')
+        js.append(f'      tl.to("#s{idx}-headline", {{ y: 0, opacity: 1, scale: 1, duration: 1.0, ease: "expo.out" }}, {t_start+1.0:.1f});')
+        js.append(f'      tl.to("#s{idx}-rule", {{ width: 800, duration: 0.6, ease: "power3.inOut" }}, {t_start+3.0:.1f});')
+        js.append(f'      tl.to("#s{idx}-sub", {{ y: 0, opacity: 1, duration: 0.7, ease: "power2.out" }}, {t_start+4.0:.1f});')
+
+    elif tpl == "stat_focus":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-counter", {{ scale: 0.5, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-counter-num", {{ scale: 0, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-age", {{ y: 20, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-name", {{ x: 80, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-quote", {{ y: 30, opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.3, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-counter", {{ scale: 1, opacity: 1, duration: 0.6, ease: "expo.out" }}, {t_start+0.4:.1f});')
+        js.append(f'      tl.to("#s{idx}-counter-num", {{ scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }}, {t_start+0.8:.1f});')
+        js.append(f'      tl.to("#s{idx}-age", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+1.5:.1f});')
+        js.append(f'      tl.to("#s{idx}-name", {{ x: 0, opacity: 1, duration: 0.7, ease: "expo.out" }}, {t_start+2.0:.1f});')
+        js.append(f'      tl.to("#s{idx}-quote", {{ y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }}, {t_start+2.8:.1f});')
+
+    elif tpl == "three_column":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-eyebrow", {{ y: -20, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-headline", {{ y: 60, opacity: 0 }});')
+        n_cards = len(scene["data"].get("cards", []))
+        for k in range(n_cards):
+            js.append(f'      gsap.set("#s{idx}-card{k+1}", {{ y: 80, opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.4, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-eyebrow", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+0.3:.1f});')
+        js.append(f'      tl.to("#s{idx}-headline", {{ y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }}, {t_start+0.6:.1f});')
+        for k in range(n_cards):
+            js.append(f'      tl.to("#s{idx}-card{k+1}", {{ y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }}, {t_start+1.3+k*0.3:.1f});')
+
+    elif tpl == "tag_list":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-glow", {{ scale: 0, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-eyebrow", {{ y: -20, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-headline", {{ y: 60, opacity: 0, scale: 0.95 }});')
+        js.append(f'      gsap.set("#s{idx}-sub", {{ y: 20, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-nations .nation", {{ y: 40, opacity: 0, scale: 0.8 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.3, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-glow", {{ scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" }}, {t_start+0.2:.1f});')
+        js.append(f'      tl.to("#s{idx}-eyebrow", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+0.4:.1f});')
+        js.append(f'      tl.to("#s{idx}-headline", {{ y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }}, {t_start+0.7:.1f});')
+        js.append(f'      tl.to("#s{idx}-sub", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+1.5:.1f});')
+        n_tags = len(scene["data"].get("tags", []))
+        for k in range(n_tags):
+            js.append(f'      tl.to("#s{idx}-nations .nation:nth-child({k+1})", {{ y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }}, {t_start+2.5+k*0.3:.1f});')
+
+    elif tpl == "cta":
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-badge", {{ y: -20, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-headline", {{ y: 80, opacity: 0, scale: 0.9 }});')
+        js.append(f'      gsap.set("#s{idx}-sub", {{ y: 20, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-btn", {{ scale: 0, opacity: 0 }});')
+        js.append(f'      gsap.set("#s{idx}-subbottom", {{ y: 20, opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.4, ease: "power2.inOut" }}, {t_start:.1f});')
+        js.append(f'      tl.to("#s{idx}-badge", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+0.4:.1f});')
+        js.append(f'      tl.to("#s{idx}-headline", {{ y: 0, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out" }}, {t_start+0.7:.1f});')
+        js.append(f'      tl.to("#s{idx}-sub", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+2.0:.1f});')
+        js.append(f'      tl.to("#s{idx}-btn", {{ scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.5)" }}, {t_start+3.0:.1f});')
+        js.append(f'      tl.to("#s{idx}-subbottom", {{ y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }}, {t_start+4.0:.1f});')
+
+    else:
+        # Fallback: simple fade-in for unknown templates
+        js.append(f'      gsap.set("#{sid}", {{ opacity: 0 }});')
+        js.append(f'      tl.to("#{sid}", {{ opacity: 1, duration: 0.4, ease: "power2.inOut" }}, {t_start:.1f});')
+
+    # Fade out at end of scene
+    js.append(f'      tl.to("#{sid} .scene-content > *", {{ opacity: 0, y: -20, duration: 0.5, ease: "power2.in", stagger: 0.05 }}, {t_end-1.5:.1f});')
+    js.append(f'      tl.to("#{sid} .top-bar, #{sid} .bottom-bar", {{ opacity: 0, duration: 0.3 }}, {t_end-1.5:.1f});')
+    js.append(f'      tl.to("#{sid}", {{ opacity: 0, duration: 0.4 }}, {t_end-0.8:.1f});')
+    js.append("")
+
+    # Register under the compositionId that HyperFrames expects
+    comp_id = f"scene_{scene_idx:02d}"
+    js.append(f'      window.__timelines["{comp_id}"] = tl;')
+    return "\n".join(js)
+
+
 # ─────────────────────────────────────────────
 # CSS FOR PORTRAIT MODE OVERRIDES
 # ─────────────────────────────────────────────
@@ -834,6 +968,8 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
         data-track-index="0"
         data-scene="scene1"></video>"""
 
+    gsap_js = build_scene_gsap(scene, idx, scene['duration'])
+
     return f"""<!doctype html>
 <html lang="en">
   <head>
@@ -859,7 +995,8 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
       .scene {{ position:absolute; inset:0; width:{w}px; height:{h}px;
         overflow:hidden; background:transparent; }}
       .scene-video {{ position:absolute; inset:0; width:{w}px; height:{h}px;
-        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7); }}
+        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7);
+        opacity:1; visibility:visible; }}
       .scene-vignette {{ position:absolute; inset:0; z-index:2;
         background: radial-gradient(ellipse 80% 60% at 50% 50%,rgba(10,10,10,0.35),rgba(10,10,10,0.85) 100%),
           linear-gradient(180deg,rgba(10,10,10,0.4) 0%,rgba(10,10,10,0.1) 30%,rgba(10,10,10,0.7) 100%);
@@ -957,15 +1094,10 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
         {video_html}
         {scene_html}
       </div>
+      <script>
+{gsap_js}
+      </script>
     </template>
-    <script>
-      window.__timelines = window.__timelines || {{}};
-      document.addEventListener("DOMContentLoaded", function () {{
-        window.__timelines["scene_{idx:02d}"] = window.gsap
-          ? window.gsap.timeline({{ paused: true }})
-          : {{ paused: true }};
-      }});
-    </script>
   </body>
 </html>"""
 
