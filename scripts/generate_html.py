@@ -946,16 +946,18 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
     </style>
   </head>
   <body>
-    <div id="hyperframes-root"
-      data-composition-id="scene_{idx:02d}"
-      data-width="{w}"
-      data-height="{h}"
-      data-start="0"
-      data-duration="{scene['duration']:.1f}"
-    >
-      {video_html}
-      {scene_html}
-    </div>
+    <template id="scene_{idx:02d}-template">
+      <div id="hyperframes-root"
+        data-composition-id="scene_{idx:02d}"
+        data-width="{w}"
+        data-height="{h}"
+        data-start="0"
+        data-duration="{scene['duration']:.1f}"
+      >
+        {video_html}
+        {scene_html}
+      </div>
+    </template>
     <script>
       window.__timelines = window.__timelines || {{}};
       document.addEventListener("DOMContentLoaded", function () {{
