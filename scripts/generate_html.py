@@ -545,24 +545,40 @@ def build_scene_html(scene: dict, idx: int, fmt: dict, fmt_name: str) -> str:
     scene_html = tpl_fn(scene, 1, fs)  # always idx=1 inside sub-comp
     scene_html = scene_html.replace("{{START_1}}", "0")  # sub-comp starts at 0
 
-    # Asset path is relative to the PARENT document (the runtime clones the
-    # template's content into the parent when the sub-comp activates), so
+    # Asset path is relative to the PARENT document (the runtime injects
+    # the sub-comp body into the parent at playback time), so
     # "assets/clips/..." resolves against <parent>/assets/clips/...
     # — which is exactly where fetch_clips.py places the processed files.
     video_html = f"""
-      <video id="vid-scene1" class="scene-video"
+      <video id="vid-scene{idx:02d}" class="scene-video"
         src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}"
         muted playsinline preload="auto"
         data-start="0" data-duration="{scene['duration']}"
         data-track-index="0"
-        data-scene="scene1"></video>"""
+        data-scene="scene{idx:02d}"></video>"""
 
     return f"""<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Scene {idx}: {scene['id']}</title>
+    <!--
+      Fonts are loaded via the <link> below, but the linter only counts
+      @font-face rules that appear inside the file's own <style> block
+      (cli.js:50721, extractFontFaceFamilies). The inline @font-face
+      rules below cover the latin face for each font the scene uses,
+      so the linter sees the declarations and the warning goes away.
+      Asset paths in the src:url(...) are parent-relative (no ../)
+      because the runtime injects sub-comp content into the parent
+      document at playback time.
+    -->
+    <link rel="stylesheet" href="assets/fonts/fonts.css" />
     <style>
+      @font-face {{ font-family: "Anton"; font-weight:400; src: url("assets/fonts/1Ptgg87LROyAm3Kz-C8.woff2") format("woff2"); font-display: block; }}
+      @font-face {{ font-family: "Manrope"; font-weight:350; src: url("assets/fonts/xn7gYHE41ni1AdIRggexSg.woff2") format("woff2"); font-display: block; }}
+      @font-face {{ font-family: "Manrope"; font-weight:400; src: url("assets/fonts/xn7gYHE41ni1AdIRggexSg.woff2") format("woff2"); font-display: block; }}
+      @font-face {{ font-family: "JetBrains Mono"; font-weight:400; src: url("assets/fonts/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2") format("woff2"); font-display: block; }}
+      @font-face {{ font-family: "Arial Narrow"; font-weight:400; src: url("assets/fonts/tss0ApVBdCYD5Q7hcxTE1ArZ0bbwiXw.woff2") format("woff2"); font-display: block; }}
       :root {{
         --bg: #0a0a0a; --fg: #f5f5f0; --accent: #ffd700;
         --accent-dim: #b8980a; --rule: #2a2a2a; --muted: #888;
@@ -667,30 +683,22 @@ def build_scene_html(scene: dict, idx: int, fmt: dict, fmt_name: str) -> str:
     </style>
   </head>
   <body>
-    <!--
-      Sub-composition wrapper. HyperFrames validates this file as an entry
-      composition (data-composition-id + data-width/data-height are required
-      on the root), even though it is loaded via data-composition-src from
-      the parent. The runtime injects this content into the parent document
-      at the host div's data-start, so asset paths here are resolved
-      against the PARENT (hf_input/).
-    -->
     <div id="scene-{idx:02d}"
          data-composition-id="scene_{idx:02d}"
          data-width="{w}" data-height="{h}"
          data-start="0" data-duration="{scene['duration']:.1f}">
       {video_html}
       {scene_html}
+      <script>
+        // Register the sub-comp timeline. The framework auto-nests it
+        // under the parent's timeline; the host div's data-duration
+        // controls the actual on-screen time.
+        window.__timelines = window.__timelines || {{}};
+        window.__timelines["scene_{idx:02d}"] = window.gsap
+          ? window.gsap.timeline({{ paused: true }})
+          : {{ paused: true }};
+      </script>
     </div>
-    <script>
-      // Register the sub-comp timeline. The framework auto-nests it
-      // under the parent's timeline; the host div's data-duration
-      // controls the actual on-screen time.
-      window.__timelines = window.__timelines || {{}};
-      window.__timelines["scene_{idx:02d}"] = window.gsap
-        ? window.gsap.timeline({{ paused: true }})
-        : {{ paused: true }};
-    </script>
   </body>
 </html>"""
 
