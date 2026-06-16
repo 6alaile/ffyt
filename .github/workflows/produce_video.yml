@@ -167,6 +167,26 @@ jobs:
           echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           ls -la "$GITHUB_WORKSPACE"
           test -f "$GITHUB_WORKSPACE/composition.html" && echo "composition.html OK" || echo "composition.html MISSING"
+          echo "--- assets/clips/ ---"
+          ls -la assets/clips/ || true
+          echo "--- hf_input/compositions/assets/clips/ ---"
+          ls -la hf_input/compositions/assets/clips/ || true
+          # Fail loudly if any processed clip is missing or <1KB.
+          # An empty file is the other common cause of "ffprobe exited with
+          # code 1" with empty stderr — different from the path mirror fix.
+          SMALL=0
+          for f in assets/clips/*_processed.mp4; do
+            [ -e "$f" ] || { echo "MISSING: $f"; SMALL=$((SMALL+1)); continue; }
+            sz=$(stat -c%s "$f")
+            if [ "$sz" -lt 1024 ]; then
+              echo "TOO SMALL ($sz bytes): $f"
+              SMALL=$((SMALL+1))
+            fi
+          done
+          if [ "$SMALL" -gt 0 ]; then
+            echo "::error::$SMALL clip file(s) are missing or under 1KB — fetch_clips.py likely produced a partial output. Re-run the workflow after deleting the cache and assets/clips/."
+            exit 1
+          fi
 
       # ── Render via HyperFrames ───────────────────────────────────
       - name: Render video with HyperFrames
@@ -175,6 +195,17 @@ jobs:
           cp -r assets hf_input/assets
           cp -r compositions hf_input/compositions
           cp composition.html hf_input/index.html
+          # The server-side video_extract phase resolves <video src="assets/clips/...">
+          # against the sub-comp's own URL (compositions/scene_NN.html), not the
+          # parent's. Mirror the clips into the sub-comp-relative location so
+          # ffprobe can find them. Browser playback is unaffected — it still
+          # resolves the same src against the parent (hf_input/index.html).
+          mkdir -p hf_input/compositions/assets/clips
+          cp assets/clips/*_processed.mp4 hf_input/compositions/assets/clips/
+          # Same for voiceover audio (the <audio> in sub-comps, if any, would
+          # also resolve against the sub-comp's URL).
+          mkdir -p hf_input/compositions/assets/audio
+          cp assets/audio/full_voiceover.mp3 hf_input/compositions/assets/audio/ || true
           npx --yes hyperframes render hf_input --output output_raw.mp4
 
       # ── Save rendered video as artifact ─────────────────────────
