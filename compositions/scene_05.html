@@ -109,23 +109,25 @@
   </head>
   <body>
     <!--
-      Sub-composition template. The runtime clones this <template>'s content
-      into the parent document when this scene's host div activates, so asset
-      paths are resolved against the PARENT (hf_input/) and the timeline
-      below runs in the parent's window.
+      Sub-composition wrapper. HyperFrames validates this file as an entry
+      composition (data-composition-id + data-width/data-height are required
+      on the root), even though it is loaded via data-composition-src from
+      the parent. The runtime injects this content into the parent document
+      at the host div's data-start, so asset paths here are resolved
+      against the PARENT (hf_input/).
     -->
-    <template id="scene_05-template">
-      <div data-composition-id="scene_05"
-           data-width="1920" data-height="1080"
-           data-start="0" data-duration="35.0">
-        
+    <div id="scene-05"
+         data-composition-id="scene_05"
+         data-width="1920" data-height="1080"
+         data-start="0" data-duration="35.0">
+      
       <video id="vid-scene1" class="scene-video"
         src="assets/clips/05_hosts_processed.mp4" data-src="assets/clips/05_hosts_processed.mp4"
         muted playsinline preload="auto"
         data-start="0" data-duration="35"
         data-track-index="0"
         data-scene="scene1"></video>
-        
+      
       <!-- ──────────── SCENE 1: 05_HOSTS ──────────── -->
       <div id="scene1" class="scene clip" style="z-index: 1;"
         data-start="0" data-duration="35">
@@ -165,16 +167,15 @@
           <span>NORTH AMERICA</span>
         </div>
       </div>
-      </div>
-      <script>
-        // Register the sub-comp timeline. The framework auto-nests it
-        // under the parent's timeline; the host div's data-duration
-        // controls the actual on-screen time.
-        window.__timelines = window.__timelines || {};
-        window.__timelines["scene_05"] = window.gsap
-          ? window.gsap.timeline({ paused: true })
-          : { paused: true };
-      </script>
-    </template>
+    </div>
+    <script>
+      // Register the sub-comp timeline. The framework auto-nests it
+      // under the parent's timeline; the host div's data-duration
+      // controls the actual on-screen time.
+      window.__timelines = window.__timelines || {};
+      window.__timelines["scene_05"] = window.gsap
+        ? window.gsap.timeline({ paused: true })
+        : { paused: true };
+    </script>
   </body>
 </html>

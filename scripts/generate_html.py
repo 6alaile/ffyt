@@ -523,20 +523,22 @@ PORTRAIT_OVERRIDES = """
 # ─────────────────────────────────────────────
 # SUB-COMPOSITION BUILDER (one file per scene)
 #
-# HyperFrames requires sub-comps loaded via data-composition-src to be
-# wrapped in a <template> element. The runtime clones the template
-# content into the parent document when each instance activates, so
-# asset paths inside the sub-comp are resolved against the PARENT
-# document's base URL — not the sub-comp's own URL. This is why the
-# video src below uses "assets/clips/..." (no leading "../") and why
-# the template can be hosted alongside the parent.
+# Each scene is written as a standalone HyperFrames composition: the
+# root <div> carries data-composition-id and data-width/data-height
+# (required by the linter even when the file is loaded via
+# data-composition-src), and __timelines["scene_NN"] is registered.
+# The parent host divs reference these files; at runtime the framework
+# reads each sub-comp's body and mounts it in the parent document for
+# the duration of its data-start..data-start+data-duration window,
+# so asset paths inside the sub-comp resolve against the PARENT
+# (hf_input/) — not the sub-comp's own URL.
 # ─────────────────────────────────────────────
 
 def build_scene_html(scene: dict, idx: int, fmt: dict, fmt_name: str) -> str:
-    """Build a standalone sub-composition HTML for a single scene."""
+    """Build a sub-composition HTML for a single scene."""
     w, h = fmt["width"], fmt["height"]
     fs = fmt["font_scale"]
-    sid = f"scene{idx}"
+    sid = f"scene{idx:02d}"
     portrait_css = PORTRAIT_OVERRIDES if fmt_name == "portrait" else ""
 
     tpl_fn = TEMPLATE_MAP.get(scene.get("template", "impact_statement"), tpl_impact_statement)
@@ -666,28 +668,29 @@ def build_scene_html(scene: dict, idx: int, fmt: dict, fmt_name: str) -> str:
   </head>
   <body>
     <!--
-      Sub-composition template. The runtime clones this <template>'s content
-      into the parent document when this scene's host div activates, so asset
-      paths are resolved against the PARENT (hf_input/) and the timeline
-      below runs in the parent's window.
+      Sub-composition wrapper. HyperFrames validates this file as an entry
+      composition (data-composition-id + data-width/data-height are required
+      on the root), even though it is loaded via data-composition-src from
+      the parent. The runtime injects this content into the parent document
+      at the host div's data-start, so asset paths here are resolved
+      against the PARENT (hf_input/).
     -->
-    <template id="scene_{idx:02d}-template">
-      <div data-composition-id="scene_{idx:02d}"
-           data-width="{w}" data-height="{h}"
-           data-start="0" data-duration="{scene['duration']:.1f}">
-        {video_html}
-        {scene_html}
-      </div>
-      <script>
-        // Register the sub-comp timeline. The framework auto-nests it
-        // under the parent's timeline; the host div's data-duration
-        // controls the actual on-screen time.
-        window.__timelines = window.__timelines || {{}};
-        window.__timelines["scene_{idx:02d}"] = window.gsap
-          ? window.gsap.timeline({{ paused: true }})
-          : {{ paused: true }};
-      </script>
-    </template>
+    <div id="scene-{idx:02d}"
+         data-composition-id="scene_{idx:02d}"
+         data-width="{w}" data-height="{h}"
+         data-start="0" data-duration="{scene['duration']:.1f}">
+      {video_html}
+      {scene_html}
+    </div>
+    <script>
+      // Register the sub-comp timeline. The framework auto-nests it
+      // under the parent's timeline; the host div's data-duration
+      // controls the actual on-screen time.
+      window.__timelines = window.__timelines || {{}};
+      window.__timelines["scene_{idx:02d}"] = window.gsap
+        ? window.gsap.timeline({{ paused: true }})
+        : {{ paused: true }};
+    </script>
   </body>
 </html>"""
 
