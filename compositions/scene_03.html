@@ -3,8 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <title>Scene 3: 03_last_dance</title>
-    <link rel="stylesheet" href="../assets/fonts/fonts.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       :root {
         --bg: #0a0a0a; --fg: #f5f5f0; --accent: #ffd700;
@@ -23,8 +21,7 @@
       .scene { position:absolute; inset:0; width:1920px; height:1080px;
         overflow:hidden; background:transparent; }
       .scene-video { position:absolute; inset:0; width:1920px; height:1080px;
-        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7);
-        opacity:0; visibility:hidden; }
+        object-fit:cover; z-index:0; filter:brightness(0.55) saturate(0.7); }
       .scene-vignette { position:absolute; inset:0; z-index:2;
         background: radial-gradient(ellipse 80% 60% at 50% 50%,rgba(10,10,10,0.35),rgba(10,10,10,0.85) 100%),
           linear-gradient(180deg,rgba(10,10,10,0.4) 0%,rgba(10,10,10,0.1) 30%,rgba(10,10,10,0.7) 100%);
@@ -111,21 +108,24 @@
     </style>
   </head>
   <body>
-    <div id="hyperframes-root"
-      data-composition-id="scene_03"
-      data-width="1920"
-      data-height="1080"
-      data-start="0"
-      data-duration="32.0"
-    >
-      
-      <video id="vid-scene1" class="scene-video clip"
-        src="../assets/clips/03_last_dance_processed.mp4" data-src="../assets/clips/03_last_dance_processed.mp4"
-        muted playsinline
+    <!--
+      Sub-composition template. The runtime clones this <template>'s content
+      into the parent document when this scene's host div activates, so asset
+      paths are resolved against the PARENT (hf_input/) and the timeline
+      below runs in the parent's window.
+    -->
+    <template id="scene_03-template">
+      <div data-composition-id="scene_03"
+           data-width="1920" data-height="1080"
+           data-start="0" data-duration="32.0">
+        
+      <video id="vid-scene1" class="scene-video"
+        src="assets/clips/03_last_dance_processed.mp4" data-src="assets/clips/03_last_dance_processed.mp4"
+        muted playsinline preload="auto"
         data-start="0" data-duration="32"
         data-track-index="0"
         data-scene="scene1"></video>
-      
+        
       <!-- ──────────── SCENE 1: 03_LAST_DANCE ──────────── -->
       <div id="scene1" class="scene clip" style="z-index: 1;"
         data-start="0" data-duration="32">
@@ -155,14 +155,16 @@
           <span>2026 — THE FINALE</span>
         </div>
       </div>
-    </div>
-    <script>
-      window.__timelines = window.__timelines || {};
-      document.addEventListener("DOMContentLoaded", function () {
+      </div>
+      <script>
+        // Register the sub-comp timeline. The framework auto-nests it
+        // under the parent's timeline; the host div's data-duration
+        // controls the actual on-screen time.
+        window.__timelines = window.__timelines || {};
         window.__timelines["scene_03"] = window.gsap
           ? window.gsap.timeline({ paused: true })
           : { paused: true };
-      });
-    </script>
+      </script>
+    </template>
   </body>
 </html>

@@ -521,301 +521,18 @@ PORTRAIT_OVERRIDES = """
 
 
 # ─────────────────────────────────────────────
-# FULL HTML ASSEMBLY
-# ─────────────────────────────────────────────
-
-def build_video_layer(scenes: list) -> str:
-    """Generate all <video> tags as direct stage children (required by HyperFrames)."""
-    parts = []
-    for i, scene in enumerate(scenes):
-        idx = i + 1
-        sid = f"scene{idx}"
-        parts.append(f"""
-      <!-- video for scene {idx} -->
-      <video id="vid-{sid}" class="scene-video clip"
-        src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}"
-        muted playsinline
-        data-start="{{{{START_{idx}}}}}" data-duration="{scene['duration']}"
-        data-track-index="{idx-1}"
-        data-scene="{sid}"></video>""")
-    return "\n".join(parts)
-
-
-def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
-    scenes = config["scenes"]
-    w, h = fmt["width"], fmt["height"]
-    fs = fmt["font_scale"]
-
-    # Compute start times for placeholder replacement
-    starts = []
-    t = 0.0
-    for s in scenes:
-        starts.append(t)
-        t += s["duration"]
-    total_duration = t
-
-    # Build scene visibility CSS
-    scene_vis_css = "\n".join(
-        f"      #scene{i+1} {{ z-index: {'1' if i == 0 else '2'}; {'opacity: 0;' if i > 0 else ''} }}"
-        for i in range(len(scenes))
-    )
-
-    portrait_css = PORTRAIT_OVERRIDES if fmt_name == "portrait" else ""
-
-    # Build video layer (hoisted outside scene divs — required by HyperFrames)
-    videos_html = build_video_layer(scenes)
-
-    # Build scene HTML
-    scenes_html = ""
-    for i, scene in enumerate(scenes):
-        tpl_fn = TEMPLATE_MAP.get(scene.get("template", "impact_statement"), tpl_impact_statement)
-        scenes_html += tpl_fn(scene, i + 1, fs)
-
-    # Voiceover element
-    vo_html = f"""
-      <!-- ──────────── VOICEOVER ──────────── -->
-      <audio id="vo-track" src="assets/audio/full_voiceover.mp3"
-        data-start="0" data-duration="{total_duration:.2f}"
-        data-track-index="{len(scenes)}" data-volume="1"></audio>"""
-
-    # Replace start time placeholders in both layers
-    for i, t_start in enumerate(starts):
-        placeholder = f"{{{{START_{i+1}}}}}"
-        videos_html = videos_html.replace(placeholder, str(t_start))
-        scenes_html = scenes_html.replace(placeholder, str(t_start))
-
-    html = f"""<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{config.get('title', 'Video Composition')}</title>
-    <link rel="stylesheet" href="assets/fonts/fonts.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
-    <style>
-      :root {{
-        --bg: #0a0a0a;
-        --fg: #f5f5f0;
-        --accent: #ffd700;
-        --accent-dim: #b8980a;
-        --rule: #2a2a2a;
-        --muted: #888;
-      }}
-
-      html, body {{
-        margin: 0; padding: 0;
-        background: var(--bg);
-        color: var(--fg);
-        font-family: "Manrope", system-ui, sans-serif;
-        font-weight: 350;
-        font-size: {scale_font(28, fs)}px;
-        line-height: 1.35;
-        overflow: hidden;
-        width: {w}px;
-        height: {h}px;
-      }}
-
-      .display, .display * {{
-        font-family: "Anton", "Arial Narrow", sans-serif;
-        font-weight: 400;
-        letter-spacing: -0.005em;
-        line-height: 0.92;
-        text-transform: uppercase;
-      }}
-
-      .mono, .mono * {{
-        font-family: "JetBrains Mono", "Courier New", monospace;
-        font-variant-numeric: tabular-nums;
-        letter-spacing: 0;
-      }}
-
-      #hyperframes-root {{
-        position: relative;
-        width: {w}px;
-        height: {h}px;
-        background: var(--bg);
-        overflow: hidden;
-      }}
-
-      .scene {{
-        position: absolute;
-        inset: 0;
-        width: {w}px;
-        height: {h}px;
-        overflow: hidden;
-        background: transparent;
-      }}
-
-      {scene_vis_css}
-
-      .scene-content {{
-        position: relative;
-        width: 100%;
-        height: 100%;
-        padding: 100px 120px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 32px;
-        z-index: 3;
-      }}
-
-      .scene-video {{
-        position: absolute;
-        inset: 0;
-        width: {w}px;
-        height: {h}px;
-        object-fit: cover;
-        z-index: 0;
-        filter: brightness(0.55) saturate(0.7);
-      }}
-
-      .scene-vignette {{
-        position: absolute;
-        inset: 0;
-        z-index: 2;
-        background:
-          radial-gradient(ellipse 80% 60% at 50% 50%, rgba(10,10,10,0.35), rgba(10,10,10,0.85) 100%),
-          linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.1) 30%, rgba(10,10,10,0.7) 100%);
-        pointer-events: none;
-      }}
-
-      .scene-glow {{
-        position: absolute;
-        width: 1400px; height: 1400px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(255,215,0,0.12) 0%, rgba(255,215,0,0) 60%);
-        z-index: 2;
-        pointer-events: none;
-      }}
-
-      .top-bar {{
-        position: absolute; top: 0; left: 0; right: 0;
-        height: 60px; padding: 0 120px;
-        display: flex; justify-content: space-between; align-items: center;
-        z-index: 5;
-        font-family: "JetBrains Mono", monospace;
-        font-size: {scale_font(18, fs)}px;
-        color: var(--muted);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        border-bottom: 1px solid var(--rule);
-      }}
-      .top-bar .mark {{ color: var(--accent); font-weight: 700; }}
-
-      .bottom-bar {{
-        position: absolute; bottom: 0; left: 0; right: 0;
-        height: 80px; padding: 0 120px;
-        display: flex; justify-content: space-between; align-items: center;
-        z-index: 5;
-        font-family: "JetBrains Mono", monospace;
-        font-size: {scale_font(20, fs)}px;
-        color: var(--muted);
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        border-top: 1px solid var(--rule);
-      }}
-      .bottom-bar .pill {{
-        color: var(--accent);
-        padding: 6px 14px;
-        border: 1px solid var(--accent);
-        border-radius: 2px;
-      }}
-
-      /* Layout helpers */
-      .split-layout {{ flex-direction: row !important; align-items: stretch; gap: 80px; padding: 0 120px; }}
-      .left {{ flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 40px; }}
-      .right {{ flex: 1; display: flex; flex-direction: column; gap: 32px; justify-content: center; }}
-      .stats-col {{ flex: 0 0 700px; display: flex; flex-direction: column; gap: 24px; justify-content: center; }}
-
-      /* Typography */
-      .eyebrow {{ font-family: "JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px; color:var(--accent); letter-spacing:0.4em; text-transform:uppercase; }}
-      .headline {{ font-size:{scale_font(150,fs)}px; color:var(--fg); }}
-      .headline .accent {{ color:var(--accent); }}
-      .body-text {{ font-size:{scale_font(34,fs)}px; color:var(--fg); line-height:1.3; max-width:1200px; }}
-      .body-italic {{ font-size:{scale_font(36,fs)}px; color:var(--fg); font-style:italic; font-weight:300; max-width:1100px; margin-top:24px; }}
-      .subhead {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(28,fs)}px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-top:32px; }}
-
-      /* Stat cards */
-      .stat {{ display:flex; flex-direction:column; gap:8px; padding:24px 32px; border-left:4px solid var(--accent); background:rgba(255,215,0,0.04); }}
-      .stat .num {{ font-size:{scale_font(110,fs)}px; color:var(--accent); line-height:0.9; }}
-      .stat .label {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px; color:var(--fg); letter-spacing:0.1em; text-transform:uppercase; }}
-
-      /* Names row */
-      .names {{ display:flex; gap:80px; margin-top:40px; align-items:center; justify-content:center; }}
-      .name {{ font-size:{scale_font(80,fs)}px; color:var(--accent); }}
-      .name .year {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(24,fs)}px; color:var(--muted); letter-spacing:0.1em; display:block; margin-top:8px; }}
-      .vs {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(32,fs)}px; color:var(--muted); }}
-      .gold-rule {{ position:absolute; background:var(--accent); z-index:4; }}
-
-      /* Stat focus */
-      .counter-wrap {{ flex:0 0 900px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px; border:4px solid var(--accent); background:rgba(255,215,0,0.05); }}
-      .counter-label {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(24,fs)}px; color:var(--accent); letter-spacing:0.3em; text-transform:uppercase; margin-bottom:16px; }}
-      .counter {{ font-size:{scale_font(380,fs)}px; color:var(--accent); line-height:0.85; }}
-      .counter-suffix {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(36,fs)}px; color:var(--fg); letter-spacing:0.1em; text-transform:uppercase; margin-top:16px; }}
-      .age {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(32,fs)}px; color:var(--accent); letter-spacing:0.15em; text-transform:uppercase; }}
-      .quote {{ font-size:{scale_font(36,fs)}px; color:var(--fg); line-height:1.3; border-left:4px solid var(--accent); padding-left:24px; margin-top:24px; }}
-
-      /* Three column */
-      .host-grid {{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:40px; flex:1; }}
-      .host-card {{ display:flex; flex-direction:column; gap:16px; padding:40px 32px; background:rgba(255,255,255,0.03); border-top:6px solid var(--accent); }}
-      .flag {{ font-size:{scale_font(90,fs)}px; line-height:1; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }}
-      .host-name {{ font-size:{scale_font(64,fs)}px; color:var(--fg); }}
-      .host-stats {{ display:flex; flex-direction:column; gap:4px; margin-top:auto; }}
-      .host-stat {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(20,fs)}px; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }}
-      .host-stat .v {{ color:var(--fg); }}
-      .host-quote {{ font-size:{scale_font(22,fs)}px; color:var(--accent); font-style:italic; margin-top:12px; }}
-
-      /* Tag list */
-      .nations {{ display:flex; flex-wrap:wrap; gap:24px; justify-content:center; max-width:1600px; }}
-      .nation {{ display:flex; align-items:center; gap:12px; padding:16px 28px; background:rgba(255,215,0,0.08); border:1px solid var(--accent); font-family:"JetBrains Mono",monospace; font-size:{scale_font(32,fs)}px; color:var(--fg); text-transform:uppercase; letter-spacing:0.04em; }}
-      .nation .new {{ color:var(--accent); font-size:{scale_font(18,fs)}px; letter-spacing:0.2em; }}
-
-      /* CTA */
-      .badge {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px; color:var(--accent); letter-spacing:0.4em; text-transform:uppercase; margin-bottom:24px; padding:12px 32px; border:2px solid var(--accent); }}
-      .subscribe-btn {{ display:inline-flex; align-items:center; gap:16px; margin-top:48px; padding:24px 64px; background:var(--accent); color:var(--bg); font-family:"Anton",sans-serif; font-size:{scale_font(56,fs)}px; text-transform:uppercase; letter-spacing:0.05em; cursor:pointer; }}
-      .sub-bottom {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px; color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; margin-top:24px; }}
-      .trophy {{ position:absolute; bottom:100px; right:100px; font-size:{scale_font(180,fs)}px; opacity:0.15; }}
-
-      {portrait_css}
-    </style>
-  </head>
-  <body>
-    <div id="hyperframes-root"
-      data-composition-id="composition"
-      data-width="{w}"
-      data-height="{h}"
-      data-start="0"
-      data-duration="{total_duration:.1f}"
-    >
-      {videos_html}
-      {scenes_html}
-      {vo_html}
-    </div>
-
-    <script>
-      /* HyperFrames requires window.__timelines["composition"] to be registered.
-         No gsap.set() calls here — initial visibility is handled via CSS. */
-      window.__timelines = window.__timelines || {{}};
-      document.addEventListener("DOMContentLoaded", function () {{
-        if (window.gsap) {{
-          window.__timelines["composition"] = window.gsap.timeline({{ paused: true }});
-        }} else {{
-          window.__timelines["composition"] = {{ paused: true }};
-        }}
-      }});
-    </script>
-  </body>
-</html>"""
-
-    return html
-
-
-# ─────────────────────────────────────────────
 # SUB-COMPOSITION BUILDER (one file per scene)
+#
+# HyperFrames requires sub-comps loaded via data-composition-src to be
+# wrapped in a <template> element. The runtime clones the template
+# content into the parent document when each instance activates, so
+# asset paths inside the sub-comp are resolved against the PARENT
+# document's base URL — not the sub-comp's own URL. This is why the
+# video src below uses "assets/clips/..." (no leading "../") and why
+# the template can be hosted alongside the parent.
 # ─────────────────────────────────────────────
 
-def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name: str) -> str:
+def build_scene_html(scene: dict, idx: int, fmt: dict, fmt_name: str) -> str:
     """Build a standalone sub-composition HTML for a single scene."""
     w, h = fmt["width"], fmt["height"]
     fs = fmt["font_scale"]
@@ -826,10 +543,14 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
     scene_html = tpl_fn(scene, 1, fs)  # always idx=1 inside sub-comp
     scene_html = scene_html.replace("{{START_1}}", "0")  # sub-comp starts at 0
 
+    # Asset path is relative to the PARENT document (the runtime clones the
+    # template's content into the parent when the sub-comp activates), so
+    # "assets/clips/..." resolves against <parent>/assets/clips/...
+    # — which is exactly where fetch_clips.py places the processed files.
     video_html = f"""
-      <video id="vid-scene1" class="scene-video clip"
-        src="../{clip_src(scene['id'])}" data-src="../{clip_src(scene['id'])}"
-        muted playsinline
+      <video id="vid-scene1" class="scene-video"
+        src="{clip_src(scene['id'])}" data-src="{clip_src(scene['id'])}"
+        muted playsinline preload="auto"
         data-start="0" data-duration="{scene['duration']}"
         data-track-index="0"
         data-scene="scene1"></video>"""
@@ -839,8 +560,6 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
   <head>
     <meta charset="UTF-8" />
     <title>Scene {idx}: {scene['id']}</title>
-    <link rel="stylesheet" href="../assets/fonts/fonts.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <style>
       :root {{
         --bg: #0a0a0a; --fg: #f5f5f0; --accent: #ffd700;
@@ -946,24 +665,29 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
     </style>
   </head>
   <body>
-    <div id="hyperframes-root"
-      data-composition-id="scene_{idx:02d}"
-      data-width="{w}"
-      data-height="{h}"
-      data-start="0"
-      data-duration="{scene['duration']:.1f}"
-    >
-      {video_html}
-      {scene_html}
-    </div>
-    <script>
-      window.__timelines = window.__timelines || {{}};
-      document.addEventListener("DOMContentLoaded", function () {{
+    <!--
+      Sub-composition template. The runtime clones this <template>'s content
+      into the parent document when this scene's host div activates, so asset
+      paths are resolved against the PARENT (hf_input/) and the timeline
+      below runs in the parent's window.
+    -->
+    <template id="scene_{idx:02d}-template">
+      <div data-composition-id="scene_{idx:02d}"
+           data-width="{w}" data-height="{h}"
+           data-start="0" data-duration="{scene['duration']:.1f}">
+        {video_html}
+        {scene_html}
+      </div>
+      <script>
+        // Register the sub-comp timeline. The framework auto-nests it
+        // under the parent's timeline; the host div's data-duration
+        // controls the actual on-screen time.
+        window.__timelines = window.__timelines || {{}};
         window.__timelines["scene_{idx:02d}"] = window.gsap
           ? window.gsap.timeline({{ paused: true }})
           : {{ paused: true }};
-      }});
-    </script>
+      </script>
+    </template>
   </body>
 </html>"""
 
@@ -978,17 +702,20 @@ def build_parent_html(config: dict, fmt: dict, total_duration: float) -> str:
     for i, scene in enumerate(scenes):
         idx = i + 1
         mounts.append(f"""
-      <div data-composition-src="compositions/scene_{idx:02d}.html"
+      <div id="scene-{idx:02d}-host"
            data-composition-id="scene_{idx:02d}"
+           data-composition-src="compositions/scene_{idx:02d}.html"
            data-start="{t:.1f}"
            data-duration="{scene['duration']:.1f}"
-           class="clip"></div>""")
+           data-track-index="{idx-1}"
+           data-width="{w}"
+           data-height="{h}"></div>""")
         t += scene["duration"]
 
     vo_html = f"""
       <audio id="vo-track" src="assets/audio/full_voiceover.mp3"
         data-start="0" data-duration="{total_duration:.2f}"
-        data-track-index="{len(scenes)}" data-volume="1" class="clip"></audio>"""
+        data-track-index="{len(scenes)}" data-volume="1"></audio>"""
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1054,17 +781,15 @@ def main():
     comps_dir = out_path.parent / "compositions"
     comps_dir.mkdir(parents=True, exist_ok=True)
 
-    starts = []
-    t = 0.0
-    for s in scenes:
-        starts.append(t)
-        t += s["duration"]
-
     for i, scene in enumerate(scenes):
-        scene_html = build_scene_html(scene, i + 1, starts[i], fmt, args.format)
+        scene_html = build_scene_html(scene, i + 1, fmt, args.format)
         scene_path = comps_dir / f"scene_{i+1:02d}.html"
         with open(scene_path, "w", encoding="utf-8") as f:
             f.write(scene_html)
+        # `starts` (no longer needed inside build_scene_html) is kept only
+        # because the loop above still tracks cumulative start times for
+        # logging parity with the previous version; remove if you don't
+        # need it externally.
         print(f"   ✓ Scene {i+1:02d}: {scene['id']} ({scene['duration']}s) → {scene_path}")
 
     # Write parent composition
