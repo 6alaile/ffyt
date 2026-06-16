@@ -130,7 +130,15 @@ def tpl_stat_focus(scene: dict, idx: int, fs: float) -> str:
 def tpl_three_column(scene: dict, idx: int, fs: float) -> str:
     d = scene["data"]
     sid = f"scene{idx}"
-    cards_html = "".join([f'<div class="host-card" id="s{idx}-card{i+1}"><div class="flag">{c.get("flag","")}</div><div class="display host-name">{c.get("name","")}</div><div class="host-stats">{"".join([f\'<div class="host-stat"><span class="v">{s["value"]}</span> · {s["label"]}</div>\' for s in c.get("stats", [])])}</div><div class="host-quote">"{c.get("quote","")}"</div></div>' for i, c in enumerate(d.get("cards", []))])
+    
+    # Build cards HTML without backslashes in f-string
+    cards_list = []
+    for i, c in enumerate(d.get("cards", [])):
+        stats_html = "".join([f'<div class="host-stat"><span class="v">{s["value"]}</span> · {s["label"]}</div>' for s in c.get("stats", [])])
+        card_html = f'<div class="host-card" id="s{idx}-card{i+1}"><div class="flag">{c.get("flag","")}</div><div class="display host-name">{c.get("name","")}</div><div class="host-stats">{stats_html}</div></div>'
+        cards_list.append(card_html)
+    cards_html = "".join(cards_list)
+    
     return f"""
       <div id="{sid}" class="scene clip" data-duration="{scene['duration']}">
         <div class="scene-vignette"></div>
@@ -356,8 +364,8 @@ def build_scene_html(scene: dict, idx: int, fmt: dict, fmt_name: str) -> str:
       .scene {{ position:absolute; inset:0; z-index:1; }}
       .scene-video {{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(0.5); }}
       .scene-content {{ position:relative; width:100%; height:100%; padding:100px 120px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:center; gap:32px; z-index:3; }}
-      .top-bar {{ position:absolute; top:0; left:0; right:0; height:60px; padding:0 120px; display:flex; align-items:center; border-bottom:1px solid var(--rule); color:var(--muted); font-size:18px; }}
-      .bottom-bar {{ position:absolute; bottom:0; left:0; right:0; height:80px; padding:0 120px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--rule); color:var(--muted); font-size:20px; }}
+      .top-bar {{ position:absolute; top:0; left:0; right:0; height:60px; padding:0 120px; display:flex; align-items:center; border-bottom:1px solid var(--rule); color:var(--muted); font-size:18px; z-index:2; }}
+      .bottom-bar {{ position:absolute; bottom:0; left:0; right:0; height:80px; padding:0 120px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--rule); z-index:2; }}
       .stat {{ padding:24px; border-left:4px solid var(--accent); background:rgba(255,215,0,0.04); }}
       .stat .num {{ font-size:110px; color:var(--accent); }}
       .headline {{ font-size:150px; }}
