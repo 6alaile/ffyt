@@ -503,157 +503,6 @@ def build_gsap(scenes: list) -> str:
     return "\n".join(js)
 
 
-def build_scene_css_initial_states(scene: dict) -> str:
-    """CSS rules that set elements to pre-animation state.
-    HyperFrames forbids gsap.set() in registered timelines -- use CSS instead.
-    In sub-comps the scene div is always #scene1 (idx=1).
-    """
-    tpl = scene.get("template", "impact_statement")
-    rules = ["      #scene1 { opacity: 0; }"]
-
-    if tpl == "impact_statement":
-        rules += [
-            "      #s1-eyebrow { opacity: 0; transform: translateY(-30px); }",
-            "      #s1-headline { opacity: 0; transform: translateY(80px) scale(0.9); }",
-            "      #s1-rule { width: 0 !important; }",
-            "      #s1-subhead { opacity: 0; transform: translateY(20px); }",
-        ]
-    elif tpl == "stat_split":
-        rules += [
-            "      #s1-eyebrow { opacity: 0; transform: translateX(-40px); }",
-            "      #s1-headline { opacity: 0; transform: translateY(60px); }",
-            "      #s1-sub { opacity: 0; transform: translateY(30px); }",
-            "      .stat { opacity: 0; transform: translateX(60px); }",
-        ]
-    elif tpl == "title_card":
-        rules += [
-            "      #s1-glow { opacity: 0; transform: scale(0); }",
-            "      #s1-eyebrow { opacity: 0; letter-spacing: 0.8em; }",
-            "      #s1-headline { opacity: 0; transform: translateY(100px) scale(0.85); }",
-            "      #s1-rule { width: 0 !important; }",
-            "      #s1-sub { opacity: 0; transform: translateY(20px); }",
-        ]
-    elif tpl == "stat_focus":
-        rules += [
-            "      #s1-counter { opacity: 0; transform: scale(0.5); }",
-            "      #s1-counter-num { opacity: 0; transform: scale(0); }",
-            "      #s1-age { opacity: 0; transform: translateY(20px); }",
-            "      #s1-name { opacity: 0; transform: translateX(80px); }",
-            "      #s1-quote { opacity: 0; transform: translateY(30px); }",
-        ]
-    elif tpl == "three_column":
-        rules += [
-            "      #s1-eyebrow { opacity: 0; transform: translateY(-20px); }",
-            "      #s1-headline { opacity: 0; transform: translateY(60px); }",
-            "      .host-card { opacity: 0; transform: translateY(80px); }",
-        ]
-    elif tpl == "tag_list":
-        rules += [
-            "      #s1-glow { opacity: 0; transform: scale(0); }",
-            "      #s1-eyebrow { opacity: 0; transform: translateY(-20px); }",
-            "      #s1-headline { opacity: 0; transform: translateY(60px) scale(0.95); }",
-            "      #s1-sub { opacity: 0; transform: translateY(20px); }",
-            "      .nation { opacity: 0; transform: translateY(40px) scale(0.8); }",
-        ]
-    elif tpl == "cta":
-        rules += [
-            "      #s1-badge { opacity: 0; transform: translateY(-20px); }",
-            "      #s1-headline { opacity: 0; transform: translateY(80px) scale(0.9); }",
-            "      #s1-sub { opacity: 0; transform: translateY(20px); }",
-            "      #s1-btn { opacity: 0; transform: scale(0); }",
-            "      #s1-subbottom { opacity: 0; transform: translateY(20px); }",
-        ]
-
-    return "\n".join(rules)
-
-
-def build_scene_tween_js(scene: dict, duration: float) -> str:
-    """Only tl.to()/tl.set() calls -- no 'var tl', no window.__timelines.
-    HyperFrames owns the timeline; we just populate it.
-    All timestamps are relative to sub-comp local time (t=0 = scene start).
-    """
-    js = []
-    tpl = scene.get("template", "impact_statement")
-    t_end = duration
-
-    if tpl == "impact_statement":
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-eyebrow", { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.3);',
-            'tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "expo.out" }, 0.7);',
-            'tl.to("#s1-rule", { width: 240, duration: 0.4, ease: "power3.inOut" }, 2.0);',
-            'tl.to("#s1-subhead", { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 3.0);',
-        ]
-    elif tpl == "stat_split":
-        n_stats = len(scene["data"].get("stats", []))
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-eyebrow", { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.4);',
-            'tl.to("#s1-headline", { y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 0.7);',
-            'tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.4);',
-        ]
-        for k in range(n_stats):
-            js.append(f'tl.to("#s1-stat{k+1}", {{ x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }}, {2.0+k*0.4:.1f});')
-    elif tpl == "title_card":
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-glow", { scale: 1, opacity: 1, duration: 1.5, ease: "power2.out" }, 0.2);',
-            'tl.to("#s1-eyebrow", { letterSpacing: "0.4em", opacity: 1, duration: 1.0, ease: "power2.out" }, 0.5);',
-            'tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 1.0, ease: "expo.out" }, 1.0);',
-            'tl.to("#s1-rule", { width: 800, duration: 0.6, ease: "power3.inOut" }, 3.0);',
-            'tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.7, ease: "power2.out" }, 4.0);',
-        ]
-    elif tpl == "stat_focus":
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-counter", { scale: 1, opacity: 1, duration: 0.6, ease: "expo.out" }, 0.4);',
-            'tl.to("#s1-counter-num", { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }, 0.8);',
-            'tl.to("#s1-age", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.5);',
-            'tl.to("#s1-name", { x: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 2.0);',
-            'tl.to("#s1-quote", { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 2.8);',
-        ]
-    elif tpl == "three_column":
-        n_cards = len(scene["data"].get("cards", []))
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-eyebrow", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.3);',
-            'tl.to("#s1-headline", { y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 0.6);',
-        ]
-        for k in range(n_cards):
-            js.append(f'tl.to("#s1-card{k+1}", {{ y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }}, {1.3+k*0.3:.1f});')
-    elif tpl == "tag_list":
-        n_tags = len(scene["data"].get("tags", []))
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-glow", { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" }, 0.2);',
-            'tl.to("#s1-eyebrow", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.4);',
-            'tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }, 0.7);',
-            'tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.5);',
-        ]
-        for k in range(n_tags):
-            js.append(f'tl.to("#s1-nations .nation:nth-child({k+1})", {{ y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }}, {2.5+k*0.3:.1f});')
-    elif tpl == "cta":
-        js += [
-            'tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
-            'tl.to("#s1-badge", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.4);',
-            'tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out" }, 0.7);',
-            'tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 2.0);',
-            'tl.to("#s1-btn", { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.5)" }, 3.0);',
-            'tl.to("#s1-subbottom", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 4.0);',
-        ]
-    else:
-        js.append('tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);')
-
-    # Fade out at end
-    js += [
-        f'tl.to("#scene1 .scene-content > *", {{ opacity: 0, y: -20, duration: 0.5, ease: "power2.in", stagger: 0.05 }}, {t_end-1.5:.1f});',
-        f'tl.to("#scene1 .top-bar, #scene1 .bottom-bar", {{ opacity: 0, duration: 0.3 }}, {t_end-1.5:.1f});',
-        f'tl.to("#scene1", {{ opacity: 0, duration: 0.4 }}, {t_end-0.8:.1f});',
-    ]
-
-    return "\n      ".join(js)
-
-
 # ─────────────────────────────────────────────
 # CSS FOR PORTRAIT MODE OVERRIDES
 # ─────────────────────────────────────────────
@@ -966,6 +815,150 @@ def build_html(config: dict, fmt: dict, fmt_name: str) -> str:
 # SUB-COMPOSITION BUILDER (one file per scene)
 # ─────────────────────────────────────────────
 
+def _scene_initial_css(scene: dict) -> str:
+    """CSS initial states for sub-comp elements (replaces gsap.set, which is banned)."""
+    tpl = scene.get("template", "impact_statement")
+    lines = []
+    if tpl == "impact_statement":
+        lines += [
+            "      #s1-eyebrow { opacity: 0; transform: translateY(-30px); }",
+            "      #s1-headline { opacity: 0; transform: translateY(80px) scale(0.9); }",
+            "      #s1-rule { width: 0 !important; }",
+            "      #s1-subhead { opacity: 0; transform: translateY(20px); }",
+        ]
+    elif tpl == "stat_split":
+        lines += [
+            "      #s1-eyebrow { opacity: 0; transform: translateX(-40px); }",
+            "      #s1-headline { opacity: 0; transform: translateY(60px); }",
+            "      #s1-sub { opacity: 0; transform: translateY(30px); }",
+            "      .stat { opacity: 0; transform: translateX(60px); }",
+        ]
+    elif tpl == "title_card":
+        lines += [
+            "      #s1-glow { opacity: 0; transform: scale(0); }",
+            "      #s1-eyebrow { opacity: 0; letter-spacing: 0.8em; }",
+            "      #s1-headline { opacity: 0; transform: translateY(100px) scale(0.85); }",
+            "      #s1-rule { width: 0 !important; }",
+            "      #s1-sub { opacity: 0; transform: translateY(20px); }",
+        ]
+    elif tpl == "stat_focus":
+        lines += [
+            "      #s1-counter { opacity: 0; transform: scale(0.5); }",
+            "      #s1-counter-num { opacity: 0; transform: scale(0); }",
+            "      #s1-age { opacity: 0; transform: translateY(20px); }",
+            "      #s1-name { opacity: 0; transform: translateX(80px); }",
+            "      #s1-quote { opacity: 0; transform: translateY(30px); }",
+        ]
+    elif tpl == "three_column":
+        lines += [
+            "      #s1-eyebrow { opacity: 0; transform: translateY(-20px); }",
+            "      #s1-headline { opacity: 0; transform: translateY(60px); }",
+            "      .host-card { opacity: 0; transform: translateY(80px); }",
+        ]
+    elif tpl == "tag_list":
+        lines += [
+            "      #s1-glow { opacity: 0; transform: scale(0); }",
+            "      #s1-eyebrow { opacity: 0; transform: translateY(-20px); }",
+            "      #s1-headline { opacity: 0; transform: translateY(60px) scale(0.95); }",
+            "      #s1-sub { opacity: 0; transform: translateY(20px); }",
+            "      .nation { opacity: 0; transform: translateY(40px) scale(0.8); }",
+        ]
+    elif tpl == "cta":
+        lines += [
+            "      #s1-badge { opacity: 0; transform: translateY(-20px); }",
+            "      #s1-headline { opacity: 0; transform: translateY(80px) scale(0.9); }",
+            "      #s1-sub { opacity: 0; transform: translateY(20px); }",
+            "      #s1-btn { opacity: 0; transform: scale(0); }",
+            "      #s1-subbottom { opacity: 0; transform: translateY(20px); }",
+        ]
+    return "\n".join(lines)
+
+
+def _scene_tweens(scene: dict, scene_idx: int, duration: float) -> str:
+    """tl.to() animation calls for a sub-comp — no var tl, no window.__timelines.
+    Timestamps are local to the sub-comp (t=0 = scene start).
+    """
+    tpl = scene.get("template", "impact_statement")
+    t_end = duration
+    lines = []
+
+    if tpl == "impact_statement":
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-eyebrow", { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.3);',
+            '        tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 0.8, ease: "expo.out" }, 0.7);',
+            '        tl.to("#s1-rule", { width: 240, duration: 0.4, ease: "power3.inOut" }, 2.0);',
+            '        tl.to("#s1-subhead", { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 3.0);',
+        ]
+    elif tpl == "stat_split":
+        n = len(scene["data"].get("stats", []))
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-eyebrow", { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 0.4);',
+            '        tl.to("#s1-headline", { y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 0.7);',
+            '        tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.4);',
+        ]
+        for k in range(n):
+            lines.append(f'        tl.to("#s1-stat{k+1}", {{ x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }}, {2.0+k*0.4:.1f});')
+    elif tpl == "title_card":
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-glow", { scale: 1, opacity: 1, duration: 1.5, ease: "power2.out" }, 0.2);',
+            '        tl.to("#s1-eyebrow", { letterSpacing: "0.4em", opacity: 1, duration: 1.0, ease: "power2.out" }, 0.5);',
+            '        tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 1.0, ease: "expo.out" }, 1.0);',
+            '        tl.to("#s1-rule", { width: 800, duration: 0.6, ease: "power3.inOut" }, 3.0);',
+            '        tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.7, ease: "power2.out" }, 4.0);',
+        ]
+    elif tpl == "stat_focus":
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-counter", { scale: 1, opacity: 1, duration: 0.6, ease: "expo.out" }, 0.4);',
+            '        tl.to("#s1-counter-num", { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }, 0.8);',
+            '        tl.to("#s1-age", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.5);',
+            '        tl.to("#s1-name", { x: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 2.0);',
+            '        tl.to("#s1-quote", { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 2.8);',
+        ]
+    elif tpl == "three_column":
+        n = len(scene["data"].get("cards", []))
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-eyebrow", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.3);',
+            '        tl.to("#s1-headline", { y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 0.6);',
+        ]
+        for k in range(n):
+            lines.append(f'        tl.to("#s1-card{k+1}", {{ y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }}, {1.3+k*0.3:.1f});')
+    elif tpl == "tag_list":
+        n = len(scene["data"].get("tags", []))
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.3, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-glow", { scale: 1, opacity: 1, duration: 1.2, ease: "power2.out" }, 0.2);',
+            '        tl.to("#s1-eyebrow", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.4);',
+            '        tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 0.7, ease: "expo.out" }, 0.7);',
+            '        tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 1.5);',
+        ]
+        for k in range(n):
+            lines.append(f'        tl.to("#s1-nations .nation:nth-child({k+1})", {{ y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }}, {2.5+k*0.3:.1f});')
+    elif tpl == "cta":
+        lines += [
+            '        tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);',
+            '        tl.to("#s1-badge", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 0.4);',
+            '        tl.to("#s1-headline", { y: 0, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out" }, 0.7);',
+            '        tl.to("#s1-sub", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 2.0);',
+            '        tl.to("#s1-btn", { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.5)" }, 3.0);',
+            '        tl.to("#s1-subbottom", { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 4.0);',
+        ]
+    else:
+        lines.append('        tl.to("#scene1", { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 0.0);')
+
+    # Fade out at end of scene
+    lines += [
+        f'        tl.to("#scene1 .scene-content > *", {{ opacity: 0, y: -20, duration: 0.5, ease: "power2.in", stagger: 0.05 }}, {t_end-1.5:.1f});',
+        f'        tl.to("#scene1 .top-bar, #scene1 .bottom-bar", {{ opacity: 0, duration: 0.3 }}, {t_end-1.5:.1f});',
+        f'        tl.to("#scene1", {{ opacity: 0, duration: 0.4 }}, {t_end-0.8:.1f});',
+    ]
+    return "\n".join(lines)
+
+
 def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name: str) -> str:
     """Build a standalone sub-composition HTML for a single scene."""
     w, h = fmt["width"], fmt["height"]
@@ -1095,8 +1088,9 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
       .sub-bottom {{ font-family:"JetBrains Mono",monospace; font-size:{scale_font(22,fs)}px;
         color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; margin-top:24px; }}
       {portrait_css}
-      /* ── Sub-comp initial animation states (CSS replaces gsap.set) ── */
-{build_scene_css_initial_states(scene)}
+      /* ── initial animation states via CSS (no gsap.set allowed) ── */
+      #scene1 {{ opacity: 0; }}
+{_scene_initial_css(scene)}
     </style>
   </head>
   <body>
@@ -1112,7 +1106,10 @@ def build_scene_html(scene: dict, idx: int, t_start: float, fmt: dict, fmt_name:
         {scene_html}
       </div>
       <script>
-      {build_scene_tween_js(scene, scene['duration'])}
+        window.__timelines = window.__timelines || {{}};
+        var tl = gsap.timeline({{ paused: true }});
+{_scene_tweens(scene, idx, scene['duration'])}
+        window.__timelines["scene_{idx:02d}"] = tl;
       </script>
     </template>
   </body>
